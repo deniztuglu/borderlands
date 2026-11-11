@@ -264,7 +264,7 @@ dialog button { margin-top: 6px; min-height: 44px; padding: 0 22px; border-radiu
   <form method="dialog"><button type="submit">Close</button></form>
 </dialog>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" integrity="sha512-ZDSPMa/JM1D+7kdg2x3BsruQ6T/JpJo3jWDWkCZsP+5yVyp1KfESqLI+7RqB5k24F7p2cV7i2YHh/890y6P6Sw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 const PEOPLE = [
   { id: "gala", c: 0, r: 0, g: "keep", loc: "Outer Gatehouse", name: "Gala", role: "Gate guard",
@@ -621,7 +621,7 @@ const ghHeaders = () => ({ Accept: "application/vnd.github+json", Authorization:
 function apiError(status) {
   const m = {
     401: "GitHub didn't accept the token. It may be mistyped or expired.",
-    403: "The token can read the repo but not change it. Give it Contents: Read and write.",
+    403: "The token can read the repo but not change it. On GitHub, open the token (Settings → Developer settings → Fine-grained tokens → Keep reveal board) and edit it: Repository access must be Only select repositories → borderlands, and Contents must be Read and write. Save it there, then press Publish again. The token itself stays the same.",
     404: "The token can't see the borderlands repo. Check its repository access.",
     409: "The board changed on GitHub at the same moment. Press Publish again.",
     422: "GitHub turned the update down. Reload this page and try again.",
@@ -710,7 +710,7 @@ function renderConn() {
   const el = $("conn");
   if (token) {
     el.className = "conn ok";
-    el.innerHTML = `<p><b>Connected.</b> This device can publish reveals.</p><button type="button" class="linkish" id="forget">Forget the token on this device</button>`;
+    el.innerHTML = `<p><b>Connected.</b> This device can publish reveals. To change what the token can do, edit it on <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener">GitHub's token page</a>.</p><button type="button" class="linkish" id="forget">Forget the token on this device</button>`;
     $("forget").addEventListener("click", () => {
       token = ""; sha = null;
       try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
@@ -723,7 +723,7 @@ function renderConn() {
     <p>Publishing needs a GitHub token that can change one file in your <b>borderlands</b> repo. It's how GitHub knows the change comes from you. You paste it once, and this browser remembers it.</p>
     <ol>
       <li>Open <a href="https://github.com/settings/personal-access-tokens/new?name=Keep+reveal+board&amp;description=Lets+the+DM+board+update+reveal.json+in+borderlands&amp;target_name=deniztuglu&amp;expires_in=366&amp;contents=write" target="_blank" rel="noopener">GitHub's token page</a>. The name, a one-year expiry and the <b>Contents: Read and write</b> permission are already filled in.</li>
-      <li>Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick <b>borderlands</b>.</li>
+      <li>Under <b>Repository access</b>, change the default <i>Public repositories</i> to <b>Only select repositories</b> and pick <b>borderlands</b>. Then check that <b>Contents</b> still says <b>Read and write</b> under the permissions.</li>
       <li>Press <b>Generate token</b>, copy it, and paste it below.</li>
     </ol>
     <form id="tok-form" autocomplete="off">
