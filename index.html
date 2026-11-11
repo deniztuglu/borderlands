@@ -965,6 +965,7 @@ function openFile(id, push, from) {
 }
 function closeFile() {
   cur = null; stack = [];
+  if (sel) { sel = null; applyBoard(); }
   file.hidden = true;
   setLocked(false);
   $("view-people").classList.remove("with-file");
