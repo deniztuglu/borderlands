@@ -720,12 +720,10 @@ function renderConn() {
   }
   el.className = "conn";
   el.innerHTML = `<h2>Connect this device</h2>
-    <p>Publishing needs a GitHub token that can change one file in your <b>borderlands</b> repo. You make it once, and each device you run the board on keeps its own copy.</p>
+    <p>Publishing needs a GitHub token that can change one file in your <b>borderlands</b> repo. It's how GitHub knows the change comes from you. You paste it once, and this browser remembers it.</p>
     <ol>
-      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub's new fine-grained token page</a>.</li>
-      <li>Name it <i>Keep reveal board</i> and set the expiration to after the campaign ends.</li>
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new?name=Keep+reveal+board&amp;description=Lets+the+DM+board+update+reveal.json+in+borderlands&amp;target_name=deniztuglu&amp;expires_in=366&amp;contents=write" target="_blank" rel="noopener">GitHub's token page</a>. The name, a one-year expiry and the <b>Contents: Read and write</b> permission are already filled in.</li>
       <li>Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick <b>borderlands</b>.</li>
-      <li>Under <b>Permissions → Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
       <li>Press <b>Generate token</b>, copy it, and paste it below.</li>
     </ol>
     <form id="tok-form" autocomplete="off">
