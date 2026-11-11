@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#181c1a">
+<meta name="description" content="Who's who at the Keep on the Borderlands, for players.">
+<meta property="og:title" content="Who's Who at the Keep">
+<meta property="og:description" content="Everyone at the Keep, the threads between them, and room for your notes.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23b4834f'/%3E%3Ccircle cx='32' cy='30' r='16' fill='%23d1382b'/%3E%3Ccircle cx='26' cy='24' r='5' fill='%23fff' fill-opacity='.8'/%3E%3C/svg%3E">
+<title>Keep Who's Who</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Caveat:wght@500;600;700&family=Permanent+Marker&family=Special+Elite&display=swap">
+<style>
+/* Players' who's-who for the Keep. Phone first: index cards pinned to cork in two columns, grouped by
+   where you'd find each person; tap one for a case file with a little red-string board of their ties
+   and a notes box that stays on the device. A full corkboard view is there for big screens.
+   Single dark look by choice: it's a physical board on a dark table, the same on every screen.
+   Only what anyone at the Keep could tell the heroes is in this file — no DM secrets anywhere in it. */
+:root {
+  color-scheme: dark;
+  --wall: #181c1a;
+  --wall-hi: #232a26;
+  --label: #e6e8e2;
+  --dim: #a9b2ab;
+  --brass: #d3ae5a;
+  --frame: #4a2f1c;
+  --frame-hi: #6e4629;
+  --cork: #b4834f;
+  --card: #f6f1e2;
+  --ink: #2b2622;
+  --ink-soft: #5f564c;
+  --ink-pen: #23406e;
+  --rule-blue: rgba(70, 110, 170, 0.2);
+  --rule-red: rgba(196, 64, 58, 0.55);
+  --thread: #b5141d;
+  --thread-hero: #e3a91b;
+  --stamp: #b3261e;
+  --legal: #f2e38c;
+  --sticky: #f5df63;
+  --folder: #e7d6a6;
+  --folder-edge: #c9b27a;
+  --f-type: "Special Elite", "Courier New", monospace;
+  --f-hand: "Caveat", "Bradley Hand", cursive;
+  --f-marker: "Permanent Marker", "Marker Felt", cursive;
+  --f-ui: "Alegreya Sans", "Gill Sans", system-ui, sans-serif;
+  --cork-tex:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0 0.04  0 0 0 1.1 -0.35'/></filter><rect width='100%25' height='100%25' filter='url(%23c)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='d'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' seed='9' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.86  0 0 0 0 0.62  0 0 0 0.9 -0.5'/></filter><rect width='100%25' height='100%25' filter='url(%23d)'/></svg>");
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% -10%, var(--wall-hi), var(--wall) 60%), var(--wall);
+  color: var(--label);
+  font: 16px/1.5 var(--f-ui);
+  -webkit-text-size-adjust: 100%;
+}
+.wrap {
+  max-width: 1600px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button { -webkit-tap-highlight-color: transparent; }
+
+/* Header */
+.top { padding-block: 28px 14px; display: grid; gap: 8px; }
+.eyebrow { margin: 0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
+h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); letter-spacing: 0.01em; text-wrap: balance; }
+.intro { margin: 0; max-width: 62ch; color: var(--dim); font-size: 1.04rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 0.95rem; color: var(--dim); }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.legend i { display: inline-block; width: 30px; height: 3px; border-radius: 2px; }
+.legend .t { background: var(--thread); }
+.legend .h { background: var(--thread-hero); }
+
+/* Sticky bar: view switch and search */
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(24, 28, 26, 0.94);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-bottom: 10px;
+}
+.bar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.tabs { display: inline-flex; padding: 3px; border: 1px solid rgba(211, 174, 90, 0.5); border-radius: 999px; }
+.tabs button {
+  font: 600 0.98rem/1 var(--f-ui); color: var(--label); background: transparent; border: 0; cursor: pointer;
+  padding: 9px 18px; border-radius: 999px; min-height: 38px;
+}
+.tabs button[aria-selected="true"] { background: var(--brass); color: #1b1a14; }
+.tabs button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.search { flex: 1 1 180px; min-width: 0; position: relative; }
+.search input {
+  width: 100%; font: 400 16px/1.2 var(--f-ui); color: var(--label);
+  padding: 10px 14px 10px 38px; border-radius: 999px; min-height: 42px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.search input::placeholder { color: #8d968f; }
+.search input:focus { outline: none; border-color: var(--brass); background: rgba(255, 255, 255, 0.09); }
+.search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: #8d968f; fill: none; stroke-width: 2; }
+.search[hidden] { display: none; }
+
+/* Wood frame and cork, shared by the list and the board */
+.frame {
+  padding: 12px;
+  background: linear-gradient(135deg, var(--frame-hi), var(--frame) 40%, #3a2415);
+  border-radius: 6px;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 2px 6px rgba(255, 255, 255, 0.12);
+}
+.cork {
+  background-color: var(--cork);
+  background-image: var(--cork-tex),
+    radial-gradient(ellipse at 50% 40%, rgba(255, 214, 160, 0.14), transparent 65%),
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(60, 30, 10, 0.4));
+  box-shadow: inset 0 0 26px rgba(40, 20, 5, 0.55);
+}
+
+/* People view */
+.people-view { padding-block: 18px 40px; }
+.people-cork { padding: 18px 14px 30px; border-radius: 2px; }
+.group { scroll-margin-top: 130px; }
+.group + .group { margin-top: 30px; }
+.group[hidden] { display: none; }
+.tape {
+  display: inline-block; margin: 0 0 16px; padding: 6px 16px 4px;
+  background: rgba(236, 226, 190, 0.93); color: #2a2522;
+  font: 400 19px/1.1 var(--f-marker); letter-spacing: 0.02em;
+  transform: rotate(-1.2deg); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  clip-path: polygon(1% 8%, 4% 0, 97% 4%, 100% 0, 99% 92%, 96% 100%, 3% 96%, 0 100%);
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 22px 14px; }
+.empty { margin: 8px 0 0; font: 600 22px/1.2 var(--f-hand); color: #2a2522; }
+
+/* Index cards */
+.card {
+  position: relative; margin: 0; padding: 17px 12px 13px; min-width: 0;
+  display: flex; flex-direction: column; gap: 3px; text-align: left;
+  border: 0; border-radius: 1px; cursor: pointer; color: var(--ink); font: inherit;
+  background-color: var(--card);
+  background-image:
+    linear-gradient(to bottom, transparent 35px, var(--rule-red) 35px, var(--rule-red) 36.5px, transparent 36.5px),
+    linear-gradient(var(--card), var(--card)),
+    repeating-linear-gradient(to bottom, transparent 0 21px, var(--rule-blue) 21px 22px);
+  background-size: 100% 100%, 100% 37px, 100% 100%;
+  background-repeat: no-repeat, no-repeat, repeat;
+  transform: rotate(var(--r, 0deg)); transform-origin: 50% 9px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35), 0 10px 16px rgba(0, 0, 0, 0.22);
+  transition: opacity 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+.card[hidden] { display: none; }
+.card:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
+.card:hover { box-shadow: 0 3px 5px rgba(0, 0, 0, 0.4), 0 14px 22px rgba(0, 0, 0, 0.3); }
+.grid .card::before {
+  content: ""; position: absolute; left: 50%; top: 3px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.9) 0, var(--pin, #d1382b) 32%, var(--pin, #d1382b) 100%);
+  box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.35), inset 0 0 0 0.8px rgba(0, 0, 0, 0.35);
+}
+.card .loc { font: 700 9.5px/1.2 var(--f-ui); letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-soft); min-height: 16px; padding-right: 14px; }
+.card .nm { font: 400 18px/1.12 var(--f-type); color: var(--ink); margin-top: 5px; overflow-wrap: anywhere; }
+.card .role { font: 400 12.5px/1.25 var(--f-type); color: var(--ink-soft); }
+.card .q { font: 600 17.5px/1.1 var(--f-hand); color: var(--ink-pen); margin-top: 4px; }
+.card .ties { margin-top: 6px; font: 700 10px/1 var(--f-ui); letter-spacing: 0.1em; text-transform: uppercase; color: #8e1c13; }
+.card .pen { display: none; position: absolute; top: 15px; right: 9px; font: 700 15px/1 var(--f-hand); color: var(--ink-pen); }
+.card.noted .pen { display: block; }
+.card.sp { padding-bottom: 40px; }
+.stamp {
+  position: absolute; bottom: 10px; left: 10px; font: 400 12px/1 var(--f-type); letter-spacing: 0.12em;
+  border: 2.5px solid currentColor; padding: 4px 6px 3px; white-space: nowrap; pointer-events: none;
+  color: var(--stamp); transform: rotate(-7deg); mix-blend-mode: multiply; opacity: 0.85;
+}
+.card.dead { background-image: none; background-color: #dcd8ce; }
+.card.dead .nm { text-decoration: line-through; text-decoration-thickness: 1.5px; text-decoration-color: rgba(43, 38, 34, 0.6); }
+.card.hero {
+  background-color: var(--legal);
+  background-image:
+    linear-gradient(to right, transparent 18px, rgba(196,64,58,0.5) 18px, rgba(196,64,58,0.5) 19.5px, transparent 19.5px, transparent 22px, rgba(196,64,58,0.5) 22px, rgba(196,64,58,0.5) 23.5px, transparent 23.5px),
+    repeating-linear-gradient(to bottom, transparent 0 21px, rgba(60, 100, 150, 0.25) 21px 22px);
+  background-size: 100% 100%; padding-left: 32px;
+}
+.card.hero .nm { font-size: 19px; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+.card.hero .q { font-size: 20px; color: #6b1d16; }
+.card.hero .player { margin-top: 6px; font: 400 11px/1 var(--f-type); color: var(--ink-soft); display: flex; gap: 6px; align-items: flex-end; }
+.card.hero .player i { flex: 1; border-bottom: 1px solid rgba(43, 38, 34, 0.5); height: 10px; }
+.card.vellum {
+  background-image: none; background-color: #e3cc98; color: #2a1b0e; padding-bottom: 24px;
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 93% 95%, 86% 91%, 78% 97%, 70% 92%, 61% 98%, 52% 93%, 43% 99%, 34% 93%, 25% 98%, 16% 92%, 8% 97%, 0 92%);
+  box-shadow: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+}
+.card.vellum .nm { color: #8e1c13; }
+
+/* Board view */
+.board-view { padding-block: 18px 40px; }
+.board-scroll { overflow: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.board-scroll .frame { width: max-content; margin: 0 auto; padding: 16px; }
+.board { position: relative; width: 1515px; height: 1290px; overflow: hidden; }
+.board .tape { position: absolute; left: 50%; top: 22px; margin: 0; transform: translateX(-50%) rotate(-1.2deg); font-size: 27px; padding: 7px 26px 5px; white-space: nowrap; }
+.board .card { position: absolute; width: 158px; z-index: 1; }
+.sticky {
+  position: absolute; z-index: 1; width: 156px; padding: 14px 13px 14px;
+  background: var(--sticky); color: #3a2f12;
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.25), transparent 30%);
+  font: 700 21px/1.08 var(--f-hand);
+  transform: rotate(var(--r, 0deg));
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 12px rgba(0, 0, 0, 0.28);
+}
+.sticky small { display: block; margin-top: 8px; font-weight: 500; font-size: 18px; color: #5b4a24; }
+.keycard { cursor: default; }
+.keycard .row { display: flex; align-items: center; gap: 8px; font: 600 17px/1.15 var(--f-hand); color: var(--ink); }
+.keycard .row i { flex: none; width: 30px; height: 3px; border-radius: 2px; }
+.threads { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 0; }
+.threads.front { z-index: 2; }
+.thread { fill: none; stroke-width: 2.2; stroke-linecap: round; opacity: 0.85; transition: opacity 0.2s ease; }
+.thread.k-t { stroke: var(--thread); }
+.thread.k-h { stroke: var(--thread-hero); stroke-width: 2.6; }
+.threads.front .thread { opacity: 1; stroke-width: 3.4; }
+.threads.front .thread.k-h { stroke-width: 3.8; }
+.pin { transition: opacity 0.2s ease; }
+.focus .threads.back .thread { opacity: 0.1; }
+.focus .board .card:not(.lit), .focus .sticky { opacity: 0.4; filter: saturate(0.55); }
+.focus .pin:not(.lit) { opacity: 0.45; }
+.board .card.sel { box-shadow: 0 0 0 3px var(--brass), 0 12px 22px rgba(0, 0, 0, 0.4); }
+.tags { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.tag {
+  position: absolute; transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+  background: #fbf7ea; color: #2f241a; white-space: nowrap;
+  font: 700 17px/1.1 var(--f-hand); padding: 2px 8px 3px;
+  border-left: 4px solid var(--thread); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.tag.k-h { border-left-color: var(--thread-hero); }
+.hint { margin: 10px 0 0; color: var(--dim); font-size: 0.95rem; }
+
+/* Case file: full screen on phones, a side panel on big screens */
+.file {
+  position: fixed; inset: 0; z-index: 30; overflow: auto; overscroll-behavior: contain;
+  background: var(--folder); color: var(--ink);
+  padding: 0 max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+}
+.file[hidden] { display: none; }
+.file-in { max-width: 560px; margin: 0 auto; }
+.file-bar {
+  position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin: 0 -4px; padding: max(10px, env(safe-area-inset-top, 0px)) 4px 10px;
+  background: var(--folder); border-bottom: 1px dashed rgba(107, 93, 61, 0.45);
+}
+.file-bar .tab { font: 400 12px/1 var(--f-type); letter-spacing: 0.16em; color: #4d4128; }
+.file-bar button {
+  min-width: 42px; min-height: 42px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(43, 38, 34, 0.35); background: transparent; color: var(--ink);
+  font: 600 0.98rem/1 var(--f-ui);
+}
+.file-bar button:hover, .file-bar button:focus-visible { background: rgba(43, 38, 34, 0.1); outline: none; }
+.file-bar .back[hidden] { visibility: hidden; display: inline-block; }
+.file-bar .close { font-size: 22px; padding: 0; }
+.file h2 { margin: 16px 0 0; font: 400 28px/1.1 var(--f-type); text-wrap: balance; }
+.file .sub { margin: 4px 0 0; font-size: 1rem; color: var(--ink-soft); }
+.file h3 { margin: 22px 0 8px; font: 700 0.74rem/1.2 var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; color: #6b5d3d; }
+.file .about { margin: 0; font-size: 1.05rem; line-height: 1.5; }
+.file .known { margin: 8px 0 0; font: 600 21px/1.15 var(--f-hand); color: var(--ink-pen); }
+.file ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.file li button {
+  width: 100%; min-height: 44px; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  text-align: left; background: transparent; border: 0; padding: 6px 6px; border-radius: 4px; cursor: pointer;
+  font: inherit; font-size: 1rem; color: var(--ink);
+}
+.file li button:hover, .file li button:focus-visible { background: rgba(43, 38, 34, 0.09); outline: none; }
+.file li i { display: inline-block; width: 20px; height: 3px; border-radius: 2px; }
+.file li b { font-weight: 700; }
+.file li .lab { color: var(--ink-soft); }
+.file li .go { color: #8b7a55; font-size: 1.2rem; }
+.notes {
+  display: block; width: 100%; min-height: 132px; resize: vertical; margin: 0;
+  font: 600 20px/26px var(--f-hand); color: var(--ink-pen);
+  padding: 6px 12px; border: 1px solid var(--folder-edge); border-radius: 3px;
+  background-color: #fbf7ea;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 25px, var(--rule-blue) 25px 26px);
+  background-position: 0 6px; background-attachment: local;
+}
+.notes:focus { outline: 2px solid #8e6a2a; outline-offset: 1px; }
+.file .small { margin: 6px 0 0; font-size: 0.88rem; color: var(--ink-soft); }
+
+/* The little red-string board inside each file */
+.mini { position: relative; margin: 14px 0 4px; border-radius: 3px; overflow: hidden; border: 6px solid #5a3a22; }
+.mini-in { position: absolute; left: 0; top: 0; width: 360px; height: 344px; transform-origin: 0 0; }
+.mini .card { position: absolute; z-index: 1; padding: 15px 7px 8px; width: 96px; text-align: center; align-items: center; background-image: none; }
+.mini .card::before { display: none; }
+.mini .card .nm { font-size: 13.5px; margin-top: 0; }
+.mini .card .lab { font: 700 15px/1.05 var(--f-hand); margin-top: 3px; color: #8e1c13; }
+.mini .card.k-h .lab { color: #7a4f00; }
+.mini .card.hero { padding-left: 7px; }
+.mini .card.hero .nm { font-size: 13px; }
+.mini .card.me {
+  width: 128px; padding: 15px 10px 11px; cursor: default; text-align: center; align-items: center;
+  box-shadow: 0 0 0 2px var(--brass), 0 10px 16px rgba(0, 0, 0, 0.3);
+}
+.mini .card.me .nm { font-size: 17px; }
+.mini .card.me .role { font-size: 11.5px; }
+.mini .threads .thread { opacity: 0.95; stroke-width: 2.6; }
+
+@media (min-width: 900px) {
+  .file {
+    inset: 16px max(16px, env(safe-area-inset-right, 0px)) 16px auto; width: 420px;
+    border: 1px solid var(--folder-edge); border-radius: 4px; box-shadow: 0 20px 44px rgba(0, 0, 0, 0.6);
+    padding: 0 20px 24px;
+  }
+  .file-bar { padding-top: 10px; }
+}
+@media (min-width: 900px) {
+  .people-view.with-file, .board-view.with-file { padding-right: 440px; }
+}
+@media (max-width: 560px) {
+  .people-view .frame { padding: 7px; }
+  .people-cork { padding: 16px 10px 26px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 11px; }
+}
+@media (max-width: 380px) {
+  .grid .card { padding: 17px 9px 12px; }
+  .grid .card .nm { font-size: 16.5px; }
+  .grid .card .q { font-size: 16.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .thread, .pin { transition: none; }
+}
+</style>
+</head>
+<body>
+<header class="top wrap">
+  <p class="eyebrow">Heroes of the Borderlands · for players</p>
+  <h1>Who's Who at the Keep</h1>
+  <p class="intro">The people you'll meet at the Keep on the Borderlands, and how they're tied to each other and to your heroes. Tap anyone to open their file. Each file has room for your own notes, which stay on this device.</p>
+  <ul class="legend" aria-label="Thread colours">
+    <li><i class="t"></i>What anyone at the Keep could tell you</li>
+    <li><i class="h"></i>Your heroes' own ties</li>
+  </ul>
+</header>
+
+<div class="bar">
+  <div class="wrap bar-in">
+    <div class="tabs" role="tablist" aria-label="View">
+      <button type="button" role="tab" id="tab-people" aria-controls="view-people" aria-selected="true">People</button>
+      <button type="button" role="tab" id="tab-board" aria-controls="view-board" aria-selected="false">Board</button>
+    </div>
+    <label class="search" id="search-wrap">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" id="search" placeholder="Find someone" autocomplete="off" aria-label="Find someone by name or job">
+    </label>
+  </div>
+</div>
+
+<main>
+  <section class="people-view wrap" id="view-people" role="tabpanel" aria-labelledby="tab-people">
+    <div class="frame">
+      <div class="cork people-cork" id="people"></div>
+    </div>
+  </section>
+  <section class="board-view wrap" id="view-board" role="tabpanel" aria-labelledby="tab-board" hidden>
+    <div class="board-scroll" id="scroll">
+      <div class="frame" id="frame">
+        <div class="board cork" id="board">
+          <div class="tape" aria-hidden="true">The Keep on the Borderlands · who's who</div>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Tap a card to light up its threads and open its file. Tap empty cork to clear.</p>
+  </section>
+</main>
+
+<aside class="file" id="file" role="dialog" aria-labelledby="file-name" hidden>
+  <div class="file-in">
+    <div class="file-bar">
+      <button type="button" class="back" id="back" hidden>‹ Back</button>
+      <span class="tab">CASE FILE</span>
+      <button type="button" class="close" id="close" aria-label="Close the file">×</button>
+    </div>
+    <div id="file-body"></div>
+  </div>
+</aside>
+
+<script>
+/* Everything below is common knowledge at the Keep, or something a hero knows from their own past.
+   c/r = column/row on the big board. g = pin colour. */
+const PEOPLE = [
+  { id: "gala", c: 0, r: 0, g: "keep", loc: "Outer Gatehouse", name: "Gala", role: "Gate guard",
+    q: "“That's against at least four laws.”",
+    about: "Guards the outer gate and can quote every law of the Keep by number." },
+  { id: "bartho", c: 1, r: 0, g: "keep", loc: "Outer Gatehouse", name: "Bartho", role: "Gate guard",
+    q: "“Is it shift change yet?”",
+    about: "Guards the outer gate, when he's awake. Lubik once put him in the stocks for three days for napping on watch." },
+  { id: "lubik", c: 2, r: 0, g: "dead", style: "dead", loc: "Died last winter", name: "Lubik", role: "Castellan before Winvarle",
+    q: "“The gates shall close at dusk.”", stamp: "DECEASED",
+    about: "Ran the Keep before Winvarle. He shut the gates on the refugees, gave Sune's temple to Tyr, and kept the Keep alive. He died on the wall last winter. Everyone has an opinion about him." },
+  { id: "winvarle", c: 3, r: 0, g: "keep", loc: "Fortress", name: "Winvarle", role: "Castellan of the Keep",
+    q: "Talks in speeches.",
+    about: "The new Castellan. He opened the gates again and is striking out Lubik's harshest laws one by one. Look for the “W.” on the gate notice." },
+  { id: "elandra", c: 4, r: 0, g: "keep", loc: "Fortress", name: "Elandra", role: "Elf adviser to the Castellan",
+    q: "A long-suffering sigh.",
+    about: "An elf who advises the Castellan. She has advised the castellans before him too, and has opinions about all of them." },
+  { id: "xanthe", c: 5, r: 0, g: "out", loc: "Hut in the woods", name: "Xanthe", role: "Old elf druid",
+    q: "Talks in riddles.", stamp: "EXILED",
+    about: "An old elf druid who lives alone in the woods. The Keep exiled her for worshipping Chaos. She raised the ranger, and the ranger knows her better than anyone." },
+  { id: "jacko", c: 6, r: 0, g: "out", loc: "The fens", name: "Jacko", role: "Halfling fence",
+    q: "“Jacko always has your back-o.”",
+    about: "A halfling fence who works out of the fens. He buys, he sells, and he knows things, all for a price. The rogue's old fence." },
+  { id: "krentz", c: 7, r: 0, g: "out", loc: "Waterdeep, Dock Ward", name: "Krentz", role: "Xanathar Guild crew boss",
+    q: "“YOU OWE.”",
+    about: "Runs a Xanathar Guild crew in Waterdeep's Dock Ward. Bald, with eyes tattooed all over his scalp. The rogue used to work for him, and ran." },
+
+  { id: "andrella", c: 0, r: 1, g: "keep", loc: "Inner Gatehouse", name: "Andrella", role: "Captain of the guard",
+    q: "Perfect posture. Never sits.",
+    about: "Captain of the guard at the Inner Gatehouse. She served under Lubik. Captain Doran of the caravan is her older brother." },
+  { id: "shannik", c: 1, r: 1, g: "keep", loc: "Inner Bailey", name: "Shannik", role: "Soldier of the Keep",
+    q: "Grunts.",
+    about: "A soldier of the Keep and Lubik's old protégé. He still thinks Lubik was the best commander the Keep ever had." },
+  { id: "lenk", c: 2, r: 1, g: "keep", loc: "Private Apartments", name: "Lenk", role: "Jeweler and landlord",
+    q: "“Flawed.”",
+    about: "A jeweler who squints at everything through his loupe. He rents out rooms in the private apartments." },
+  { id: "dewran", c: 3, r: 1, g: "keep", loc: "Fortress", name: "Dewran", role: "Dwarf scribe to the Castellan",
+    q: "“Hm.”",
+    about: "The Castellan's scribe. He keeps the Keep's ledgers and rarely looks up from them. Winvarle trusts him completely." },
+  { id: "toryn", c: 4, r: 1, g: "keep", loc: "Guild House", name: "Toryn", role: "Guild master and librarian",
+    q: "“Freedom by argument, not by fire.”",
+    about: "Runs the Guild House and its library. She always gets the last word, and she outlasted Lubik's attempt to shut her guild down." },
+  { id: "serah", c: 5, r: 1, g: "vanguard", short: "Serah", loc: "Iron Vanguard", name: "Serah Vayne", role: "Iron Vanguard",
+    q: "Always has a book open.",
+    about: "A member of the Iron Vanguard, the adventuring company based at the Keep. Practically lives in Toryn's library." },
+  { id: "velrith", c: 6, r: 1, g: "vanguard", short: "Velrith", loc: "Iron Vanguard", name: "Velrith Zauvirr", role: "Iron Vanguard, drow",
+    q: "Sits with his back to the wall.",
+    about: "A quiet drow in the Iron Vanguard who notices everything. Spends his spare time at the stables with Cornflower." },
+
+  { id: "oleira", c: 0, r: 2, g: "keep", loc: "Trader's Shop", name: "Oleira", role: "Trader",
+    q: "Calls everyone “dear.”",
+    about: "Runs the Trader's Shop with her two teenage sons, Derlo and Ulmar. If there's gossip in the Keep, she's heard it." },
+  { id: "quink", c: 1, r: 2, g: "keep", loc: "Bank", name: "Quink", role: "Banker",
+    q: "Talks in numbers.",
+    about: "Runs the Keep's bank. Ruckus is her nephew, and he owes her bank money." },
+  { id: "kalista", c: 2, r: 2, g: "keep", loc: "Smithy", name: "Kalista", role: "Dwarf smith",
+    q: "A hammer strike instead of an answer.",
+    about: "The Keep's smith. She answers most questions with her hammer." },
+  { id: "yvette", c: 3, r: 2, g: "keep", loc: "Bank", name: "Yvette", role: "Bank guard",
+    q: "Says as little as possible.",
+    about: "Guards Quink's bank." },
+  { id: "ivlis", c: 4, r: 2, g: "keep", loc: "The temple", name: "Ivlis", role: "Priestess of Sune",
+    q: "“Love is a slow fire.”",
+    about: "The cleric's teacher in Sune's faith, and the reason the cleric is coming home: her letters asked them to. When Lubik shut the gates, she and Cornflower hid refugee families anyway." },
+  { id: "fazzir", c: 5, r: 2, g: "keep", loc: "Temple", name: "Fazzir", role: "Priest of Tyr",
+    q: "Calls everyone “friend.”",
+    about: "Keeps the temple that used to be Sune's, now Tyr's. Ivlis taught him, and he studied beside the cleric. He asked Lysa to bring a new copy of the Codex to the temple." },
+  { id: "folio", c: 6, r: 2, g: "evidence", style: "vellum", short: "Folio XLI", loc: "The Codex", name: "Folio XLI", role: "An entry in the Codex Relictorum",
+    q: "“a stone in which a mind sleeps”",
+    about: "One entry in the Codex Relictorum that Lysa is carrying. The index calls it the Stone of Golorr. Lysa thinks it's the most exciting page in the book." },
+  { id: "brom", c: 7, r: 2, g: "vanguard", short: "Brom", loc: "Iron Vanguard", name: "Brom Halvek", role: "Iron Vanguard, dwarf cleric",
+    q: "Loud and warm. Toasts the dead.",
+    about: "A dwarf cleric in the Iron Vanguard. Drinks with Kalista and is friends with Fazzir." },
+
+  { id: "derlo", c: 0, r: 3, g: "keep", loc: "Trader's Shop", name: "Derlo", role: "Oleira's son",
+    q: "Dreams of being a knight.",
+    about: "Oleira's son. He'd rather be a knight than a shopkeeper." },
+  { id: "ulmar", c: 1, r: 3, g: "keep", loc: "Trader's Shop", name: "Ulmar", role: "Oleira's son",
+    q: "Carries Martial's shield around the bailey.",
+    about: "Oleira's other son. He worships the Iron Vanguard and carries Martial's shield whenever he's allowed." },
+  { id: "ruckus", c: 2, r: 3, g: "keep", loc: "Provisioner's Shop", name: "Ruckus", role: "Provisioner",
+    q: "Shouts up at tall people.",
+    about: "Runs the Provisioner's Shop: rope, rations, lanterns, everything an adventurer forgets. Quink is his aunt." },
+  { id: "cornflower", c: 3, r: 3, g: "keep", loc: "Barn", name: "Cornflower", role: "Keeps the barn",
+    q: "“please!! the goats especially”",
+    about: "Keeps the barn and the Keep's animals, and talks in animal sayings. When Lubik shut the gates, she hid refugee families in her hayloft. Jacko is her estranged brother." },
+  { id: "martial", c: 4, r: 3, g: "vanguard", loc: "Iron Vanguard", name: "Martial", role: "Leader of the Iron Vanguard",
+    q: "“…Not yet. You're not ready.”",
+    about: "Leads the Iron Vanguard. Calm, unbeatable, and wears a dented silver gauntlet. He trained the fighter in the Daggerford militia and wrote asking them to come." },
+  { id: "umbrusk", c: 5, r: 3, g: "keep", loc: "The Drunken Dragon", name: "Umbrusk", role: "Barkeep",
+    q: "“Never forget a face.”",
+    about: "Runs the Drunken Dragon tavern. He wipes the same mug over and over, and he never forgets a face." },
+  { id: "haldryck", c: 6, r: 3, g: "keep", loc: "Traveler's Inn", name: "Haldryck", role: "Innkeeper",
+    q: "Calls everything a “luxury amenity.”",
+    about: "Runs the Traveler's Inn and is proud of every bedbug. He used to go hunting with the ranger." },
+  { id: "mallyn", c: 7, r: 3, g: "out", loc: "Trails outside the Keep", name: "Mallyn", role: "Wanderer",
+    q: "“Might you be adventurers?”",
+    about: "A wanderer you might meet on the trails around the Keep. Umbrusk's niece. She loves a good story." },
+
+  { id: "doran", c: 0, r: 4, g: "caravan", short: "Doran", loc: "The caravan", name: "Captain Doran", role: "Caravan captain",
+    q: "“Who trained you? …Martial? Then you'll live.”",
+    about: "Leads the caravan from Daggerford to the Keep. An old friend of Martial's, and Andrella's older brother. The ranger scouts for him." },
+  { id: "lysa", c: 1, r: 4, g: "caravan", loc: "The caravan", name: "Lysa", role: "Carrying the Codex Relictorum",
+    q: "“I can pay you in friendship and pie.”",
+    about: "The wizard's oldest friend. She's carrying a new copy of the Codex Relictorum to the Keep's temple for Fazzir." },
+
+  { id: "fighter", c: 2, r: 4, g: "party", style: "hero", name: "Fighter", q: "The Last Recruit",
+    about: "Trained in the Daggerford militia by Martial, the only recruit he ever called good. On the caravan to answer his letter: “I need someone I trust.”" },
+  { id: "cleric", c: 3, r: 4, g: "party", style: "hero", name: "Cleric", q: "The Ember",
+    about: "Ivlis's best student, sent to Daggerford to keep Sune's flame alive. Called home by her letters." },
+  { id: "wizard", c: 4, r: 4, g: "party", style: "hero", name: "Wizard", q: "Folio Forty-One",
+    about: "Lysa's oldest friend, hired to keep the Codex's old curses from biting her." },
+  { id: "rogue", c: 5, r: 4, g: "party", style: "hero", name: "Rogue", q: "Eyes in the Crowd",
+    about: "Ran small jobs in Waterdeep's Dock Ward for Krentz, then ran from the Xanathar Guild. Jacko pointed them to the Borderlands." },
+  { id: "ranger", c: 6, r: 4, g: "party", style: "hero", name: "Ranger", q: "The Hermit's Student",
+    about: "Raised in the wilds by Xanthe; now an outrider for Doran's caravan. This is their first trip back since her exile." },
+];
+
+/* Threads: t = what anyone at the Keep could tell you, h = a hero's own tie. */
+const L = (a, b, k, l) => ({ a, b, k, l });
+const LINKS = [
+  L("bartho", "gala", "t", "partners on the gate"),
+  L("bartho", "umbrusk", "t", "works off a bar tab"),
+  L("bartho", "lubik", "t", "three days in the stocks"),
+  L("bartho", "ivlis", "t", "she brought him soup"),
+  L("gala", "andrella", "t", "mentor and admirer"),
+  L("gala", "lubik", "t", "she still quotes his laws"),
+  L("cornflower", "ivlis", "t", "hid refugees together"),
+  L("cornflower", "jacko", "t", "estranged siblings"),
+  L("cornflower", "velrith", "t", "friends at the stables"),
+  L("lenk", "dewran", "t", "landlord and tenant"),
+  L("lenk", "quink", "t", "rival misers"),
+  L("kalista", "brom", "t", "drinking partners"),
+  L("ruckus", "quink", "t", "aunt and nephew"),
+  L("oleira", "derlo", "t", "mother and son"),
+  L("oleira", "ulmar", "t", "mother and son"),
+  L("oleira", "shannik", "t", "close, maybe more"),
+  L("oleira", "xanthe", "t", "she calls her a cult witch"),
+  L("ulmar", "martial", "t", "carries his shield"),
+  L("yvette", "quink", "t", "guards her bank"),
+  L("haldryck", "umbrusk", "t", "food rivals"),
+  L("umbrusk", "mallyn", "t", "uncle and niece"),
+  L("umbrusk", "martial", "t", "his regular table"),
+  L("toryn", "shannik", "t", "political enemies"),
+  L("toryn", "serah", "t", "lives in her library"),
+  L("toryn", "ivlis", "t", "traded books"),
+  L("toryn", "lubik", "t", "he tried to close her guild"),
+  L("fazzir", "ivlis", "t", "student and teacher"),
+  L("fazzir", "lysa", "t", "he sent her for the Codex"),
+  L("fazzir", "brom", "t", "friends"),
+  L("andrella", "doran", "t", "sister and brother"),
+  L("andrella", "martial", "t", "served under Lubik together"),
+  L("shannik", "lubik", "t", "protégé and mentor"),
+  L("shannik", "velrith", "t", "he doesn't trust him"),
+  L("winvarle", "dewran", "t", "trusts him completely"),
+  L("winvarle", "lubik", "t", "took command when he fell"),
+  L("elandra", "winvarle", "t", "his adviser"),
+  L("elandra", "xanthe", "t", "old friends"),
+  L("martial", "brom", "t", "Iron Vanguard"),
+  L("martial", "velrith", "t", "Iron Vanguard"),
+  L("martial", "serah", "t", "Iron Vanguard"),
+  L("martial", "doran", "t", "old friends"),
+  L("ivlis", "lubik", "t", "she defied his closed gates"),
+  L("lysa", "folio", "t", "she's carrying it"),
+
+  L("fighter", "martial", "h", "trained them in the militia"),
+  L("cleric", "ivlis", "h", "best student and mentor"),
+  L("cleric", "fazzir", "h", "fellow students"),
+  L("cleric", "cornflower", "h", "hid families together"),
+  L("wizard", "lysa", "h", "oldest friends"),
+  L("wizard", "folio", "h", "Lysa showed them the page"),
+  L("rogue", "krentz", "h", "the boss they ran from"),
+  L("rogue", "jacko", "h", "their old fence"),
+  L("ranger", "xanthe", "h", "she raised them"),
+  L("ranger", "haldryck", "h", "hunting partners"),
+  L("ranger", "doran", "h", "scouts for his caravan"),
+];
+
+const GROUPS = [
+  ["Your party", ["fighter", "cleric", "wizard", "rogue", "ranger"]],
+  ["The caravan", ["doran", "lysa", "folio"]],
+  ["The gates", ["gala", "bartho", "andrella", "shannik"]],
+  ["The fortress", ["winvarle", "elandra", "dewran"]],
+  ["The Iron Vanguard", ["martial", "brom", "velrith", "serah"]],
+  ["Temple and Guild House", ["ivlis", "fazzir", "toryn"]],
+  ["Shops and the bank", ["oleira", "derlo", "ulmar", "ruckus", "quink", "yvette", "lenk"]],
+  ["Smithy and barn", ["kalista", "cornflower"]],
+  ["Tavern and inn", ["umbrusk", "haldryck"]],
+  ["Outside the walls", ["xanthe", "jacko", "mallyn", "krentz"]],
+  ["Remembered", ["lubik"]],
+];
+
+const PIN = { keep: "#d1382b", vanguard: "#2f63b8", out: "#2b2b2b", party: "#e8b923", evidence: "#2f8a4e", dead: "#ececec", caravan: "#e07a2a" };
+const KIND = { t: "var(--thread)", h: "var(--thread-hero)" };
+const BW = 1515, BH = 1290;
+const X = c => 100 + c * 187.5;
+const Y = r => 100 + r * 250;
+const NOTE_KEY = "keep-whos-who-notes";
+const TAB_KEY = "keep-whos-who-tab";
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const byId = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wide = () => window.matchMedia("(min-width: 900px)").matches;
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function rnd(id, salt) {
+  let h = 2166136261;
+  for (const ch of id + salt) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 1000) / 1000;
+}
+const tiesOf = id => LINKS.filter(l => l.a === id || l.b === id).map(l => ({ ...l, other: l.a === id ? l.b : l.a }));
+
+/* Notes live only in this browser. */
+let notes = {};
+try { notes = JSON.parse(localStorage.getItem(NOTE_KEY) || "{}") || {}; } catch (e) { notes = {}; }
+let saveTimer = 0;
+function saveNotes() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(NOTE_KEY, JSON.stringify(notes)); } catch (e) {} }, 250);
+}
+function markNoted(id) {
+  const has = !!(notes[id] && notes[id].trim());
+  document.querySelectorAll(`.card[data-id="${id}"]`).forEach(c => c.classList.toggle("noted", has));
+}
+
+/* Card faces */
+function cardFace(p) {
+  const pen = `<span class="pen" aria-hidden="true">✎</span>`;
+  if (p.style === "hero") {
+    return `${pen}<span class="loc">The party</span><span class="nm">${esc(p.name)}</span><span class="q">${esc(p.q)}</span><span class="player">Player<i></i></span>`;
+  }
+  const stamp = p.stamp ? `<span class="stamp">${esc(p.stamp)}</span>` : "";
+  return `${pen}<span class="loc">${esc(p.loc)}</span><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.role)}</span><span class="q">${esc(p.q)}</span>${stamp}`;
+}
+function makeCard(p, rot) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "card" + (p.style ? " " + p.style : "") + (p.stamp ? " sp" : "");
+  el.dataset.id = p.id;
+  el.style.setProperty("--r", rot.toFixed(2) + "deg");
+  el.style.setProperty("--pin", PIN[p.g] || PIN.keep);
+  el.setAttribute("aria-label", `${p.name}${p.role ? ", " + p.role : ""}. Open file.`);
+  el.innerHTML = cardFace(p);
+  return el;
+}
+
+/* People view */
+const peopleEl = $("people");
+GROUPS.forEach(([label, ids]) => {
+  const sec = document.createElement("section");
+  sec.className = "group";
+  sec.innerHTML = `<h2 class="tape">${esc(label)}</h2><div class="grid"></div>`;
+  const grid = sec.querySelector(".grid");
+  ids.forEach(id => {
+    const p = byId[id];
+    const el = makeCard(p, (rnd(id, "lr") - 0.5) * 3.2);
+    const n = tiesOf(id).length;
+    el.insertAdjacentHTML("beforeend", p.style === "hero" ? "" : `<span class="ties">${n} thread${n === 1 ? "" : "s"}</span>`);
+    el.dataset.search = [p.name, p.role, p.loc, p.q].join(" ").toLowerCase();
+    el.addEventListener("click", () => openFile(id, false, el));
+    grid.appendChild(el);
+  });
+  peopleEl.appendChild(sec);
+});
+const emptyEl = document.createElement("p");
+emptyEl.className = "empty";
+emptyEl.hidden = true;
+emptyEl.textContent = "Nobody by that name. Yet.";
+peopleEl.appendChild(emptyEl);
+
+$("search").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  let any = false;
+  peopleEl.querySelectorAll(".group").forEach(g => {
+    let shown = 0;
+    g.querySelectorAll(".card").forEach(c => {
+      const ok = !q || c.dataset.search.includes(q);
+      c.hidden = !ok;
+      if (ok) shown++;
+    });
+    g.hidden = shown === 0;
+    if (shown) any = true;
+  });
+  emptyEl.hidden = any;
+});
+
+/* Board view */
+const board = $("board"), frame = $("frame"), scroll = $("scroll");
+const pins = {};
+PEOPLE.forEach(p => {
+  const cx = X(p.c) + (rnd(p.id, "x") - 0.5) * 20;
+  const top = Y(p.r) + (rnd(p.id, "y") - 0.5) * 26;
+  const el = makeCard(p, (rnd(p.id, "r") - 0.5) * 6);
+  el.style.left = (cx - 79) + "px";
+  el.style.top = top + "px";
+  el.addEventListener("click", e => { e.stopPropagation(); openFile(p.id, false, el); });
+  board.appendChild(el);
+  pins[p.id] = { x: cx, y: top + 9, g: p.g };
+});
+(function boardExtras() {
+  const note = document.createElement("div");
+  note.className = "sticky";
+  note.style.left = (X(7) - 78) + "px";
+  note.style.top = (Y(1) + 4) + "px";
+  note.style.setProperty("--r", "2.2deg");
+  note.innerHTML = `Tap a card to follow its threads.<small>Your notes go in each file.</small>`;
+  board.appendChild(note);
+  const key = document.createElement("div");
+  key.className = "card keycard";
+  key.setAttribute("aria-hidden", "true");
+  key.style.left = (X(7) - 92) + "px";
+  key.style.top = (Y(4) + 6) + "px";
+  key.style.width = "184px";
+  key.style.setProperty("--r", "1.4deg");
+  key.innerHTML = `<span class="loc">Key</span>
+    <span class="row" style="margin-top:8px"><i style="background:var(--thread)"></i>anyone could tell you</span>
+    <span class="row"><i style="background:var(--thread-hero)"></i>your heroes' ties</span>`;
+  board.appendChild(key);
+  pins.__key = { x: X(7), y: Y(4) + 15, g: "keep" };
+})();
+
+function layer(cls, w, h) {
+  const el = document.createElementNS(SVGNS, "svg");
+  el.setAttribute("class", "threads " + cls);
+  el.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  el.setAttribute("width", w);
+  el.setAttribute("height", h);
+  el.setAttribute("aria-hidden", "true");
+  return el;
+}
+function curve(a, b) {
+  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  const sag = Math.min(70, d * 0.09);
+  const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2 + sag;
+  return { d: `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`, p0: a, p1: { x: cx, y: cy }, p2: b };
+}
+function pointAt(t, s) {
+  const u = 1 - t;
+  return { x: u * u * s.p0.x + 2 * u * t * s.p1.x + t * t * s.p2.x, y: u * u * s.p0.y + 2 * u * t * s.p1.y + t * t * s.p2.y };
+}
+const pinDefs = (pre = "pin") => Object.entries(PIN).map(([k, c]) =>
+  `<radialGradient id="${pre}-${k}" cx="0.35" cy="0.35" r="0.75"><stop offset="0" stop-color="#fff" stop-opacity="0.9"/><stop offset="0.25" stop-color="${c}"/><stop offset="1" stop-color="${c}"/></radialGradient>`).join("");
+/* User-space filter region: a perfectly straight vertical thread has a zero-width box and would vanish otherwise. */
+const shade = (id, w = BW, h = BH) => `<filter id="${id}" filterUnits="userSpaceOnUse" x="-40" y="-40" width="${w + 80}" height="${h + 80}"><feDropShadow dx="1.5" dy="2.5" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35"/></filter>`;
+const pinMark = (p, g, id, pre = "pin") => `<g class="pin" data-id="${id}" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><ellipse cx="2.5" cy="4" rx="7" ry="5" fill="rgba(0,0,0,0.35)"/><circle r="7.5" fill="url(#${pre}-${g})" stroke="rgba(0,0,0,0.45)" stroke-width="0.8"/></g>`;
+
+/* Threads run behind the cards so names stay readable; a selected card's threads and every pin sit on top. */
+const back = layer("back", BW, BH);
+board.insertBefore(back, board.firstChild);
+const front = layer("front", BW, BH);
+board.appendChild(front);
+const tags = document.createElement("div");
+tags.className = "tags";
+board.appendChild(tags);
+const threads = LINKS.map(l => ({ ...l, ...curve(pins[l.a], pins[l.b]) }));
+back.innerHTML = `<defs>${shade("shade-b")}</defs><g filter="url(#shade-b)">${threads.map(t => `<path class="thread k-${t.k}" data-a="${t.a}" data-b="${t.b}" d="${t.d}"/>`).join("")}</g>`;
+front.innerHTML = `<defs>${pinDefs()}${shade("shade-f")}</defs><g class="litg" filter="url(#shade-f)"></g><g>${Object.entries(pins).map(([id, p]) => pinMark(p, p.g, id)).join("")}</g>`;
+
+function placeTags(list) {
+  const placed = [];
+  const cards = [...board.querySelectorAll(".card.lit")].map(el => ({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }));
+  const ov = (r, q) => Math.max(0, Math.min(r.x + r.w, q.x + q.w) - Math.max(r.x, q.x)) * Math.max(0, Math.min(r.y + r.h, q.y + q.h) - Math.max(r.y, q.y));
+  return list.map(t => {
+    const w = t.l.length * 7.6 + 24, h = 26;
+    let best = null;
+    for (const at of [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78, 0.15, 0.85]) {
+      const p = pointAt(at, t);
+      const r = { x: p.x - w / 2, y: p.y - h / 2, w, h };
+      let score = placed.reduce((n, q) => n + ov(r, q), 0) * 20 + cards.reduce((n, q) => n + ov(r, q), 0) + Math.abs(at - 0.5) * 400;
+      if (r.x < 4 || r.x + w > BW - 4 || r.y < 4 || r.y + h > BH - 4) score += 1e7;
+      if (!best || score < best.score) best = { score, p };
+    }
+    placed.push({ x: best.p.x - w / 2, y: best.p.y - h / 2, w, h });
+    return { ...t, tx: best.p.x, ty: best.p.y };
+  });
+}
+
+let sel = null;
+function applyBoard() {
+  const lit = new Set(sel ? [sel] : []);
+  const mine = sel ? threads.filter(t => t.a === sel || t.b === sel) : [];
+  mine.forEach(t => { lit.add(t.a); lit.add(t.b); });
+  frame.classList.toggle("focus", !!sel);
+  board.querySelectorAll(".card[data-id]").forEach(c => {
+    c.classList.toggle("lit", lit.has(c.dataset.id));
+    c.classList.toggle("sel", c.dataset.id === sel);
+  });
+  front.querySelector(".litg").innerHTML = mine.map(t => `<path class="thread k-${t.k}" d="${t.d}"/>`).join("");
+  front.querySelectorAll(".pin").forEach(p => p.classList.toggle("lit", lit.has(p.dataset.id)));
+  tags.innerHTML = sel && !$("view-board").hidden ? placeTags(mine).map(t =>
+    `<span class="tag k-${t.k}" style="left:${t.tx.toFixed(0)}px;top:${t.ty.toFixed(0)}px;--r:${((rnd(t.a + t.b, "t") - 0.5) * 5).toFixed(1)}deg">${esc(t.l)}</span>`).join("") : "";
+}
+board.addEventListener("click", () => { if (sel) { sel = null; applyBoard(); if (cur) closeFile(); } });
+
+function fit() {
+  const avail = scroll.clientWidth;
+  if (!avail) return;
+  frame.style.zoom = Math.max(0.5, Math.min(1.1, avail / (BW + 32))).toFixed(3);
+}
+new ResizeObserver(fit).observe(scroll);
+
+/* The case file */
+const file = $("file"), body = $("file-body"), backBtn = $("back");
+let cur = null, stack = [], opener = null;
+
+function miniBoard(p, ties) {
+  const n = ties.length;
+  const small = n <= 2;
+  const W = 360, H = small ? 250 : 344, cx = 180, cy = small ? 95 : 170, rx = 128, ry = small ? 110 : 126;
+  const start = -90 + 180 / Math.max(n, 1);
+  const mePin = { x: cx, y: cy - 40 + 9 };
+  const spots = ties.map((t, i) => {
+    const a = (start + i * 360 / n) * Math.PI / 180;
+    const x = cx + rx * Math.cos(a), y = cy + ry * Math.sin(a);
+    return { t, x, y, pin: { x, y: y - 28 + 9 } };
+  });
+  const strings = spots.map(s => `<path class="thread k-${s.t.k}" d="${curve(mePin, s.pin).d}"/>`).join("");
+  const pinsSvg = [pinMark(mePin, p.g, p.id, "mpin"), ...spots.map(s => pinMark(s.pin, byId[s.t.other].g, s.t.other, "mpin"))].join("");
+  const meCls = "card me" + (p.style ? " " + p.style : "");
+  const me = `<div class="${meCls}" style="left:${cx - 64}px;top:${cy - 40}px;--r:-1deg"><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.style === "hero" ? p.q : p.role)}</span></div>`;
+  const others = spots.map(s => {
+    const o = byId[s.t.other];
+    const cls = "card k-" + s.t.k + (o.style === "hero" || o.style === "vellum" || o.style === "dead" ? " " + o.style : "");
+    return `<button type="button" class="${cls}" data-go="${o.id}" style="left:${(s.x - 48).toFixed(0)}px;top:${(s.y - 28).toFixed(0)}px;--r:${((rnd(p.id + o.id, "m") - 0.5) * 5).toFixed(1)}deg" aria-label="${esc(o.name)}: ${esc(s.t.l)}. Open file."><span class="nm">${esc(o.short || o.name)}</span><span class="lab">${esc(s.t.l)}</span></button>`;
+  }).join("");
+  return `<div class="mini cork" data-h="${H}" aria-label="${esc(p.name)}'s threads"><div class="mini-in" style="width:${W}px;height:${H}px">
+    <svg class="threads back" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><defs>${shade("shade-m", W, H)}</defs><g filter="url(#shade-m)">${strings}</g></svg>
+    ${me}${others}
+    <svg class="threads front" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><defs>${pinDefs("mpin")}</defs>${pinsSvg}</svg>
+  </div></div>`;
+}
+function sizeMini() {
+  const m = body.querySelector(".mini");
+  if (!m) return;
+  const inner = m.querySelector(".mini-in");
+  const s = m.clientWidth / 360;
+  inner.style.transform = `scale(${s})`;
+  m.style.height = (Number(m.dataset.h) * s) + "px";
+}
+new ResizeObserver(sizeMini).observe(body);
+
+function renderFile() {
+  const p = byId[cur];
+  const ties = tiesOf(cur);
+  const sub = p.style === "hero" ? `${p.q} · write in your player's name` : [p.role, p.loc].filter(Boolean).join(" · ");
+  const list = ties.map(t => {
+    const o = byId[t.other];
+    return `<li><button type="button" data-go="${o.id}"><i style="background:${KIND[t.k]}"></i><span><b>${esc(o.name)}</b> · <span class="lab">${esc(t.l)}</span></span><span class="go" aria-hidden="true">›</span></button></li>`;
+  }).join("");
+  body.innerHTML = `
+    <h2 id="file-name">${esc(p.name)}</h2>
+    <p class="sub">${esc(sub)}</p>
+    ${ties.length ? miniBoard(p, ties) : ""}
+    <h3>${p.style === "hero" ? "Their hook" : "Who they are"}</h3>
+    <p class="about">${esc(p.about)}</p>
+    ${p.style === "hero" ? "" : `<p class="known">${esc(p.q)}</p>`}
+    ${ties.length ? `<h3>Threads (${ties.length})</h3><ul>${list}</ul>` : ""}
+    <h3><label for="note">Your notes</label></h3>
+    <textarea class="notes" id="note" spellcheck="true" placeholder="What did you learn? What don't you trust?">${esc(notes[cur] || "")}</textarea>
+    <p class="small">Saved on this device only. Nobody else sees them.</p>`;
+  backBtn.hidden = stack.length === 0;
+  backBtn.setAttribute("aria-label", stack.length ? `Back to ${byId[stack[stack.length - 1]].name}` : "Back");
+  sizeMini();
+  const ta = $("note");
+  ta.addEventListener("input", () => {
+    notes[cur] = ta.value;
+    if (!ta.value.trim()) delete notes[cur];
+    saveNotes();
+    markNoted(cur);
+  });
+}
+
+function setLocked(on) {
+  root.style.overflow = on && !wide() ? "hidden" : "";
+}
+function showFile(id) {
+  cur = id; sel = id;
+  renderFile();
+  applyBoard();
+  file.hidden = false;
+  file.scrollTop = 0;
+  setLocked(true);
+  $("view-people").classList.add("with-file");
+  $("view-board").classList.add("with-file");
+  if (!$("view-board").hidden && wide()) {
+    const el = board.querySelector(`.card[data-id="${id}"]`);
+    if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest", inline: "center" });
+  }
+}
+function openFile(id, push, from) {
+  if (push && cur && cur !== id) stack.push(cur);
+  else if (!push) { stack = []; opener = from || null; }
+  showFile(id);
+  if (!push) $("close").focus({ preventScroll: true });
+}
+function closeFile() {
+  cur = null; stack = [];
+  file.hidden = true;
+  setLocked(false);
+  $("view-people").classList.remove("with-file");
+  $("view-board").classList.remove("with-file");
+  if (opener && document.contains(opener) && opener.offsetParent) opener.focus({ preventScroll: true });
+}
+file.addEventListener("click", e => {
+  const go = e.target.closest("[data-go]");
+  if (go) openFile(go.dataset.go, true);
+});
+backBtn.addEventListener("click", () => { const prev = stack.pop(); if (prev) showFile(prev); });
+$("close").addEventListener("click", closeFile);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && cur) closeFile(); });
+window.addEventListener("resize", () => { if (cur) setLocked(true); });
+
+/* Tabs */
+function showView(v) {
+  const board = v === "board";
+  $("view-people").hidden = board;
+  $("view-board").hidden = !board;
+  $("tab-people").setAttribute("aria-selected", String(!board));
+  $("tab-board").setAttribute("aria-selected", String(board));
+  $("search-wrap").hidden = board;
+  try { localStorage.setItem(TAB_KEY, v); } catch (e) {}
+  if (board) { fit(); applyBoard(); }
+}
+$("tab-people").addEventListener("click", () => showView("people"));
+$("tab-board").addEventListener("click", () => showView("board"));
+document.querySelector(".tabs").addEventListener("keydown", e => {
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const next = $("tab-people").getAttribute("aria-selected") === "true" ? "board" : "people";
+  showView(next);
+  $("tab-" + next).focus();
+});
+
+let startView = null;
+try { startView = localStorage.getItem(TAB_KEY); } catch (e) {}
+if (startView !== "people" && startView !== "board") startView = window.innerWidth >= 1000 ? "board" : "people";
+PEOPLE.forEach(p => markNoted(p.id));
+showView(startView);
+</script>
+</body>
+</html>
