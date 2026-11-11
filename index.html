@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#181c1a">
 <meta name="description" content="Who's who at the Keep on the Borderlands, for players.">
 <meta property="og:title" content="Who's Who at the Keep">
-<meta property="og:description" content="Everyone at the Keep, the threads between them, and room for your notes.">
+<meta property="og:description" content="Everyone you've met at the Keep, the threads between them, and room for your notes.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23b4834f'/%3E%3Ccircle cx='32' cy='30' r='16' fill='%23d1382b'/%3E%3Ccircle cx='26' cy='24' r='5' fill='%23fff' fill-opacity='.8'/%3E%3C/svg%3E">
 <title>Keep Who's Who</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,6 +76,24 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 .legend i { display: inline-block; width: 30px; height: 3px; border-radius: 2px; }
 .legend .t { background: var(--thread); }
 .legend .h { background: var(--thread-hero); }
+.tally { margin: 2px 0 0; font-size: 1rem; color: var(--label); }
+.tally b { color: var(--brass); font-weight: 700; }
+
+/* "New on the board" note */
+.toast {
+  position: fixed; z-index: 25; left: 50%; transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(460px, calc(100vw - 32px));
+  display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px;
+  background: var(--sticky); color: #3a2f12; border-radius: 2px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55); font: 700 20px/1.15 var(--f-hand);
+}
+.toast[hidden] { display: none; }
+.toast p { margin: 0; flex: 1; min-width: 0; }
+.toast button {
+  flex: none; min-height: 42px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(58, 47, 18, 0.5); background: transparent; color: #3a2f12; font: 600 0.98rem/1 var(--f-ui);
+}
+.toast button:hover, .toast button:focus-visible { background: rgba(58, 47, 18, 0.1); outline: none; }
 
 /* Sticky bar: view switch and search */
 .bar {
@@ -166,6 +184,13 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 .card .ties { margin-top: 6px; font: 700 10px/1 var(--f-ui); letter-spacing: 0.1em; text-transform: uppercase; color: #8e1c13; }
 .card .pen { display: none; position: absolute; top: 15px; right: 9px; font: 700 15px/1 var(--f-hand); color: var(--ink-pen); }
 .card.noted .pen { display: block; }
+.card .new {
+  display: none; position: absolute; top: -9px; right: -7px; z-index: 2; padding: 4px 7px 3px;
+  background: var(--stamp); color: #fff8ec; font: 400 11.5px/1 var(--f-type); letter-spacing: 0.14em;
+  transform: rotate(7deg); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+.card.fresh .new { display: block; }
+.mini .card .new, .mini .card .pen { display: none; }
 .card.sp { padding-bottom: 40px; }
 .stamp {
   position: absolute; bottom: 10px; left: 10px; font: 400 12px/1 var(--f-type); letter-spacing: 0.12em;
@@ -199,6 +224,7 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 .board { position: relative; width: 1515px; height: 1290px; overflow: hidden; }
 .board .tape { position: absolute; left: 50%; top: 22px; margin: 0; transform: translateX(-50%) rotate(-1.2deg); font-size: 27px; padding: 7px 26px 5px; white-space: nowrap; }
 .board .card { position: absolute; width: 158px; z-index: 1; }
+.board .card.off { display: none; }
 .sticky {
   position: absolute; z-index: 1; width: 156px; padding: 14px 13px 14px;
   background: var(--sticky); color: #3a2f12;
@@ -217,6 +243,8 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 .thread.k-t { stroke: var(--thread); }
 .thread.k-h { stroke: var(--thread-hero); stroke-width: 2.6; }
 .threads.front .thread { opacity: 1; stroke-width: 3.4; }
+.thread.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.8s ease-out var(--d, 0s) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
 .threads.front .thread.k-h { stroke-width: 3.8; }
 .pin { transition: opacity 0.2s ease; }
 .focus .threads.back .thread { opacity: 0.1; }
@@ -323,6 +351,7 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 }
 @media (prefers-reduced-motion: reduce) {
   .card, .thread, .pin { transition: none; }
+  .thread.draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
 }
 </style>
 </head>
@@ -330,11 +359,12 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 <header class="top wrap">
   <p class="eyebrow">Heroes of the Borderlands · for players</p>
   <h1>Who's Who at the Keep</h1>
-  <p class="intro">The people you'll meet at the Keep on the Borderlands, and how they're tied to each other and to your heroes. Tap anyone to open their file. Each file has room for your own notes, which stay on this device.</p>
+  <p class="intro">The people your heroes have met at the Keep on the Borderlands, and how they're tied to each other and to you. New faces go up as you meet them. Tap anyone to open their file. Each file has room for your own notes, which stay on this device.</p>
   <ul class="legend" aria-label="Thread colours">
     <li><i class="t"></i>What anyone at the Keep could tell you</li>
     <li><i class="h"></i>Your heroes' own ties</li>
   </ul>
+  <p class="tally" id="tally" aria-live="polite"></p>
 </header>
 
 <div class="bar">
@@ -379,6 +409,12 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
   </div>
 </aside>
 
+<div class="toast" id="toast" role="status" hidden>
+  <p id="toast-text"></p>
+  <button type="button" id="toast-ok">Got it</button>
+</div>
+
+<script>window.KEEP_LIVE = { url: "reveal.json" };</script>
 <script>
 /* Everything below is common knowledge at the Keep, or something a hero knows from their own past.
    c/r = column/row on the big board. g = pin colour. */
@@ -582,6 +618,9 @@ const NOTE_KEY = "keep-whos-who-notes";
 const TAB_KEY = "keep-whos-who-tab";
 const SVGNS = "http://www.w3.org/2000/svg";
 
+const LIVE_KEY = "keep-whos-who-live";
+const SEEN_KEY = "keep-whos-who-seen";
+
 const byId = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
@@ -593,15 +632,34 @@ function rnd(id, salt) {
   for (const ch of id + salt) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
   return ((h >>> 0) % 1000) / 1000;
 }
-const tiesOf = id => LINKS.filter(l => l.a === id || l.b === id).map(l => ({ ...l, other: l.a === id ? l.b : l.a }));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+/* Who is on the board. On the players' site (window.KEEP_LIVE, added by the build) the DM's Reveal
+   Board decides; heroes are always there, and before anything loads the board starts with everyone
+   the heroes know from their backstories. Anywhere else (the DM's preview) everyone shows. */
+const LIVE = window.KEEP_LIVE || null;
+const HEROES = PEOPLE.filter(p => p.style === "hero").map(p => p.id);
+const START = [...new Set(LINKS.filter(l => l.k === "h").flatMap(l => [l.a, l.b]))].filter(id => !HEROES.includes(id));
+const cleanIds = a => (Array.isArray(a) ? a : []).filter(id => typeof id === "string" && byId[id]);
+let revealed = new Set(LIVE ? [...HEROES, ...cleanIds(store.get(LIVE_KEY, START))] : PEOPLE.map(p => p.id));
+const seenStored = LIVE ? store.get(SEEN_KEY, null) : null;
+let seen = Array.isArray(seenStored) ? new Set(seenStored) : null; /* null until we know what this player has seen */
+const isOn = id => revealed.has(id);
+const isFresh = id => !!seen && isOn(id) && !seen.has(id) && !HEROES.includes(id);
+const tiesOf = id => !isOn(id) ? [] : LINKS
+  .filter(l => (l.a === id || l.b === id) && isOn(l.a) && isOn(l.b))
+  .map(l => ({ ...l, other: l.a === id ? l.b : l.a }));
 
 /* Notes live only in this browser. */
-let notes = {};
-try { notes = JSON.parse(localStorage.getItem(NOTE_KEY) || "{}") || {}; } catch (e) { notes = {}; }
+const notesStored = store.get(NOTE_KEY, {});
+let notes = notesStored && typeof notesStored === "object" ? notesStored : {};
 let saveTimer = 0;
 function saveNotes() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { try { localStorage.setItem(NOTE_KEY, JSON.stringify(notes)); } catch (e) {} }, 250);
+  saveTimer = setTimeout(() => store.set(NOTE_KEY, notes), 250);
 }
 function markNoted(id) {
   const has = !!(notes[id] && notes[id].trim());
@@ -610,12 +668,12 @@ function markNoted(id) {
 
 /* Card faces */
 function cardFace(p) {
-  const pen = `<span class="pen" aria-hidden="true">✎</span>`;
+  const marks = `<span class="new" aria-hidden="true">NEW</span><span class="pen" aria-hidden="true">✎</span>`;
   if (p.style === "hero") {
-    return `${pen}<span class="loc">The party</span><span class="nm">${esc(p.name)}</span><span class="q">${esc(p.q)}</span><span class="player">Player<i></i></span>`;
+    return `${marks}<span class="loc">The party</span><span class="nm">${esc(p.name)}</span><span class="q">${esc(p.q)}</span><span class="player">Player<i></i></span>`;
   }
   const stamp = p.stamp ? `<span class="stamp">${esc(p.stamp)}</span>` : "";
-  return `${pen}<span class="loc">${esc(p.loc)}</span><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.role)}</span><span class="q">${esc(p.q)}</span>${stamp}`;
+  return `${marks}<span class="loc">${esc(p.loc)}</span><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.role)}</span><span class="q">${esc(p.q)}</span>${stamp}`;
 }
 function makeCard(p, rot) {
   const el = document.createElement("button");
@@ -639,8 +697,7 @@ GROUPS.forEach(([label, ids]) => {
   ids.forEach(id => {
     const p = byId[id];
     const el = makeCard(p, (rnd(id, "lr") - 0.5) * 3.2);
-    const n = tiesOf(id).length;
-    el.insertAdjacentHTML("beforeend", p.style === "hero" ? "" : `<span class="ties">${n} thread${n === 1 ? "" : "s"}</span>`);
+    if (p.style !== "hero") el.insertAdjacentHTML("beforeend", `<span class="ties"></span>`);
     el.dataset.search = [p.name, p.role, p.loc, p.q].join(" ").toLowerCase();
     el.addEventListener("click", () => openFile(id, false, el));
     grid.appendChild(el);
@@ -653,21 +710,26 @@ emptyEl.hidden = true;
 emptyEl.textContent = "Nobody by that name. Yet.";
 peopleEl.appendChild(emptyEl);
 
-$("search").addEventListener("input", e => {
-  const q = e.target.value.trim().toLowerCase();
+let query = "";
+$("search").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); refreshPeople(); });
+function refreshPeople() {
   let any = false;
   peopleEl.querySelectorAll(".group").forEach(g => {
     let shown = 0;
     g.querySelectorAll(".card").forEach(c => {
-      const ok = !q || c.dataset.search.includes(q);
+      const id = c.dataset.id;
+      const ok = isOn(id) && (!query || c.dataset.search.includes(query));
       c.hidden = !ok;
+      c.classList.toggle("fresh", isFresh(id));
+      const t = c.querySelector(".ties");
+      if (t) { const n = tiesOf(id).length; t.textContent = `${n} thread${n === 1 ? "" : "s"}`; }
       if (ok) shown++;
     });
     g.hidden = shown === 0;
     if (shown) any = true;
   });
   emptyEl.hidden = any;
-});
+}
 
 /* Board view */
 const board = $("board"), frame = $("frame"), scroll = $("scroll");
@@ -688,7 +750,7 @@ PEOPLE.forEach(p => {
   note.style.left = (X(7) - 78) + "px";
   note.style.top = (Y(1) + 4) + "px";
   note.style.setProperty("--r", "2.2deg");
-  note.innerHTML = `Tap a card to follow its threads.<small>Your notes go in each file.</small>`;
+  note.innerHTML = `Tap a card to follow its threads.<small>New faces go up as you meet them.</small>`;
   board.appendChild(note);
   const key = document.createElement("div");
   key.className = "card keycard";
@@ -732,14 +794,35 @@ const pinMark = (p, g, id, pre = "pin") => `<g class="pin" data-id="${id}" trans
 /* Threads run behind the cards so names stay readable; a selected card's threads and every pin sit on top. */
 const back = layer("back", BW, BH);
 board.insertBefore(back, board.firstChild);
+back.innerHTML = `<defs>${shade("shade-b")}</defs><g class="strings" filter="url(#shade-b)"></g>`;
 const front = layer("front", BW, BH);
 board.appendChild(front);
+front.innerHTML = `<defs>${pinDefs()}${shade("shade-f")}</defs><g class="litg" filter="url(#shade-f)"></g><g class="pins"></g>`;
 const tags = document.createElement("div");
 tags.className = "tags";
 board.appendChild(tags);
-const threads = LINKS.map(l => ({ ...l, ...curve(pins[l.a], pins[l.b]) }));
-back.innerHTML = `<defs>${shade("shade-b")}</defs><g filter="url(#shade-b)">${threads.map(t => `<path class="thread k-${t.k}" data-a="${t.a}" data-b="${t.b}" d="${t.d}"/>`).join("")}</g>`;
-front.innerHTML = `<defs>${pinDefs()}${shade("shade-f")}</defs><g class="litg" filter="url(#shade-f)"></g><g>${Object.entries(pins).map(([id, p]) => pinMark(p, p.g, id)).join("")}</g>`;
+const threads = LINKS.map(l => ({ ...l, key: l.a + "~" + l.b, ...curve(pins[l.a], pins[l.b]) }));
+const shownThreads = () => threads.filter(t => isOn(t.a) && isOn(t.b));
+const drawn = new Set(); /* threads already drawn in front of this player, so new ones can be strung in */
+
+function refreshBoard() {
+  board.querySelectorAll(".card[data-id]").forEach(c => {
+    c.classList.toggle("off", !isOn(c.dataset.id));
+    c.classList.toggle("fresh", isFresh(c.dataset.id));
+  });
+  const boardOn = !$("view-board").hidden;
+  const vis = shownThreads();
+  let n = 0;
+  back.querySelector(".strings").innerHTML = vis.map(t => {
+    const draw = boardOn && !reduceMotion && !drawn.has(t.key) && (isFresh(t.a) || isFresh(t.b));
+    return `<path class="thread k-${t.k}${draw ? " draw" : ""}"${draw ? ` style="--d:${(0.25 * n++).toFixed(2)}s"` : ""} pathLength="1" data-a="${t.a}" data-b="${t.b}" d="${t.d}"/>`;
+  }).join("");
+  if (boardOn) vis.forEach(t => drawn.add(t.key));
+  front.querySelector(".pins").innerHTML = Object.entries(pins)
+    .filter(([id]) => id === "__key" || isOn(id))
+    .map(([id, p]) => pinMark(p, p.g, id)).join("");
+  applyBoard();
+}
 
 function placeTags(list) {
   const placed = [];
@@ -762,8 +845,9 @@ function placeTags(list) {
 
 let sel = null;
 function applyBoard() {
+  if (sel && !isOn(sel)) sel = null;
   const lit = new Set(sel ? [sel] : []);
-  const mine = sel ? threads.filter(t => t.a === sel || t.b === sel) : [];
+  const mine = sel ? shownThreads().filter(t => t.a === sel || t.b === sel) : [];
   mine.forEach(t => { lit.add(t.a); lit.add(t.b); });
   frame.classList.toggle("focus", !!sel);
   board.querySelectorAll(".card[data-id]").forEach(c => {
@@ -839,7 +923,7 @@ function renderFile() {
     <h3>${p.style === "hero" ? "Their hook" : "Who they are"}</h3>
     <p class="about">${esc(p.about)}</p>
     ${p.style === "hero" ? "" : `<p class="known">${esc(p.q)}</p>`}
-    ${ties.length ? `<h3>Threads (${ties.length})</h3><ul>${list}</ul>` : ""}
+    ${ties.length ? `<h3>Threads (${ties.length})</h3><ul>${list}</ul>` : `<p class="small">No threads yet. They'll appear as you meet the people tied to them.</p>`}
     <h3><label for="note">Your notes</label></h3>
     <textarea class="notes" id="note" spellcheck="true" placeholder="What did you learn? What don't you trust?">${esc(notes[cur] || "")}</textarea>
     <p class="small">Saved on this device only. Nobody else sees them.</p>`;
@@ -860,6 +944,7 @@ function setLocked(on) {
 }
 function showFile(id) {
   cur = id; sel = id;
+  markSeen([id]);
   renderFile();
   applyBoard();
   file.hidden = false;
@@ -890,21 +975,92 @@ file.addEventListener("click", e => {
   const go = e.target.closest("[data-go]");
   if (go) openFile(go.dataset.go, true);
 });
-backBtn.addEventListener("click", () => { const prev = stack.pop(); if (prev) showFile(prev); });
+backBtn.addEventListener("click", () => {
+  let prev = stack.pop();
+  while (prev && !isOn(prev)) prev = stack.pop();
+  if (prev) showFile(prev); else closeFile();
+});
 $("close").addEventListener("click", closeFile);
 document.addEventListener("keydown", e => { if (e.key === "Escape" && cur) closeFile(); });
 window.addEventListener("resize", () => { if (cur) setLocked(true); });
 
+/* New faces */
+const toast = $("toast");
+function nameList(ids) {
+  const n = ids.map(id => byId[id].name);
+  if (n.length === 1) return n[0];
+  if (n.length <= 3) return n.slice(0, -1).join(", ") + " and " + n[n.length - 1];
+  return `${n[0]}, ${n[1]} and ${n.length - 2} more`;
+}
+function updateToast() {
+  const fresh = PEOPLE.map(p => p.id).filter(isFresh);
+  if (!fresh.length) { toast.hidden = true; return; }
+  $("toast-text").textContent = `New on the board: ${nameList(fresh)}.`;
+  toast.hidden = false;
+}
+function markSeen(ids) {
+  if (!seen) return;
+  let changed = false;
+  ids.forEach(id => { if (!seen.has(id)) { seen.add(id); changed = true; } });
+  if (!changed) return;
+  store.set(SEEN_KEY, [...seen]);
+  document.querySelectorAll(".card[data-id]").forEach(c => c.classList.toggle("fresh", isFresh(c.dataset.id)));
+  if (!toast.hidden) updateToast();
+}
+$("toast-ok").addEventListener("click", () => { markSeen(PEOPLE.map(p => p.id).filter(isFresh)); toast.hidden = true; });
+
+function refreshTally() {
+  const met = [...revealed].filter(id => !HEROES.includes(id)).length;
+  const n = shownThreads().length;
+  $("tally").innerHTML = LIVE
+    ? `<b>${met}</b> ${met === 1 ? "person" : "people"} met so far · <b>${n}</b> thread${n === 1 ? "" : "s"} pinned`
+    : `Preview with everyone showing: <b>${met}</b> people · <b>${n}</b> threads`;
+}
+function refreshAll() {
+  refreshPeople();
+  refreshBoard();
+  refreshTally();
+  PEOPLE.forEach(p => markNoted(p.id));
+  if (cur && !isOn(cur)) closeFile();
+  else if (cur && document.activeElement !== $("note")) renderFile();
+}
+
+/* Keep in step with the DM's Reveal Board */
+function setRevealed(ids) {
+  const next = new Set([...HEROES, ...cleanIds(ids)]);
+  const same = next.size === revealed.size && [...next].every(id => revealed.has(id));
+  if (same) return [];
+  const before = new Set([...revealed].filter(isFresh));
+  revealed = next;
+  refreshAll();
+  return [...revealed].filter(id => isFresh(id) && !before.has(id));
+}
+async function pull() {
+  try {
+    const res = await fetch(`${LIVE.url}?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const ids = cleanIds((await res.json()).revealed);
+    store.set(LIVE_KEY, ids);
+    return setRevealed(ids);
+  } catch (e) {
+    return [];
+  }
+}
+async function poll() {
+  const added = await pull();
+  if (added.length) updateToast();
+}
+
 /* Tabs */
 function showView(v) {
-  const board = v === "board";
-  $("view-people").hidden = board;
-  $("view-board").hidden = !board;
-  $("tab-people").setAttribute("aria-selected", String(!board));
-  $("tab-board").setAttribute("aria-selected", String(board));
-  $("search-wrap").hidden = board;
-  try { localStorage.setItem(TAB_KEY, v); } catch (e) {}
-  if (board) { fit(); applyBoard(); }
+  const onBoard = v === "board";
+  $("view-people").hidden = onBoard;
+  $("view-board").hidden = !onBoard;
+  $("tab-people").setAttribute("aria-selected", String(!onBoard));
+  $("tab-board").setAttribute("aria-selected", String(onBoard));
+  $("search-wrap").hidden = onBoard;
+  store.set(TAB_KEY, v);
+  if (onBoard) { fit(); refreshBoard(); }
 }
 $("tab-people").addEventListener("click", () => showView("people"));
 $("tab-board").addEventListener("click", () => showView("board"));
@@ -915,11 +1071,19 @@ document.querySelector(".tabs").addEventListener("keydown", e => {
   $("tab-" + next).focus();
 });
 
-let startView = null;
-try { startView = localStorage.getItem(TAB_KEY); } catch (e) {}
+let startView = store.get(TAB_KEY, null);
 if (startView !== "people" && startView !== "board") startView = window.innerWidth >= 1000 ? "board" : "people";
-PEOPLE.forEach(p => markNoted(p.id));
+refreshAll();
 showView(startView);
+if (LIVE) {
+  pull().then(() => {
+    if (seen === null) { seen = new Set(revealed); store.set(SEEN_KEY, [...seen]); }
+    refreshAll();
+    updateToast();
+    setInterval(() => { if (document.visibilityState === "visible") poll(); }, 30000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") poll(); });
+  });
+}
 </script>
 </body>
 </html>

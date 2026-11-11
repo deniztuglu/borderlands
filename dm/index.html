@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#181c1a">
+<title>Reveal Board</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2324201c'/%3E%3Ccircle cx='32' cy='30' r='16' fill='%23d3ae5a'/%3E%3Ccircle cx='26' cy='24' r='5' fill='%23fff' fill-opacity='.8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Caveat:wght@600;700&family=Permanent+Marker&family=Special+Elite&display=swap">
+<style>
+/* The DM's side of Who's Who at the Keep. Tap who the party has met, publish, and the players'
+   page shows those cards and every thread between revealed people. The build script fills in the
+   cast from the players' page, so both always use the same data. Phone first: a list of toggles,
+   with a board preview above it and a publish bar pinned to the bottom. */
+:root {
+  color-scheme: dark;
+  --wall: #181c1a;
+  --wall-hi: #232a26;
+  --panel: #222824;
+  --line: rgba(255, 255, 255, 0.12);
+  --label: #e6e8e2;
+  --dim: #a9b2ab;
+  --brass: #d3ae5a;
+  --frame: #4a2f1c;
+  --frame-hi: #6e4629;
+  --cork: #b4834f;
+  --card: #f6f1e2;
+  --ink: #2b2622;
+  --ink-soft: #5f564c;
+  --thread: #b5141d;
+  --thread-hero: #e3a91b;
+  --add: #e3a91b;
+  --drop: #e0574c;
+  --ok: #8fc79a;
+  --folder: #e7d6a6;
+  --folder-edge: #c9b27a;
+  --f-type: "Special Elite", "Courier New", monospace;
+  --f-hand: "Caveat", "Bradley Hand", cursive;
+  --f-marker: "Permanent Marker", "Marker Felt", cursive;
+  --f-ui: "Alegreya Sans", "Gill Sans", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(ellipse at 50% -10%, var(--wall-hi), var(--wall) 60%), var(--wall);
+  color: var(--label); font: 16px/1.5 var(--f-ui); -webkit-text-size-adjust: 100%;
+}
+.wrap {
+  max-width: 1200px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button { -webkit-tap-highlight-color: transparent; font: inherit; }
+a { color: var(--brass); }
+
+.top { padding-block: max(26px, env(safe-area-inset-top, 0px)) 6px; display: grid; gap: 8px; }
+.eyebrow { margin: 0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
+h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.2rem)/1.02 var(--f-marker); }
+.intro { margin: 0; max-width: 62ch; color: var(--dim); font-size: 1.04rem; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 4px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid rgba(211, 174, 90, 0.5); background: transparent; color: var(--label);
+  font-weight: 600; font-size: 0.95rem; text-decoration: none; cursor: pointer;
+}
+.pill:hover, .pill:focus-visible { background: rgba(211, 174, 90, 0.14); outline: none; }
+
+/* Connection */
+.conn {
+  margin-top: 18px; padding: 16px 18px 18px; border-radius: 4px;
+  background: var(--folder); color: var(--ink); border: 1px solid var(--folder-edge);
+}
+.conn h2 { margin: 0 0 6px; font: 400 1.35rem/1.15 var(--f-type); }
+.conn p { margin: 0 0 8px; }
+.conn ol { margin: 8px 0 12px; padding-left: 1.3em; display: grid; gap: 6px; }
+.conn a { color: #7a4f00; font-weight: 700; }
+.conn label { display: block; font: 700 0.74rem/1.2 var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; color: #6b5d3d; margin-bottom: 6px; }
+.tok-row { display: flex; gap: 8px; }
+.tok-row input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0 12px; font: 400 16px/1 var(--f-ui);
+  border: 1px solid var(--folder-edge); border-radius: 3px; background: #fbf7ea; color: var(--ink);
+}
+.tok-row input:focus { outline: 2px solid #8e6a2a; outline-offset: 1px; }
+.tok-row button, .conn .btn {
+  min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--ink); color: var(--folder); font-weight: 700;
+}
+.conn .small { font-size: 0.9rem; color: var(--ink-soft); margin: 8px 0 0; }
+.conn.ok { background: transparent; color: var(--label); border-color: var(--line); padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.conn.ok p { margin: 0; }
+.conn.ok b { color: var(--ok); }
+.linkish { background: none; border: 0; padding: 0; color: var(--dim); text-decoration: underline; cursor: pointer; font-size: 0.92rem; }
+
+/* Live status */
+.live { margin: 22px 0 10px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.live p { margin: 0; font-size: 1.02rem; }
+.live b { color: var(--brass); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Board preview */
+.preview-scroll { overflow: hidden; }
+.frame {
+  width: max-content; margin: 0 auto; padding: 14px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--frame-hi), var(--frame) 40%, #3a2415);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.12);
+}
+.board {
+  position: relative; width: 1515px; height: 1290px; overflow: hidden;
+  background-color: var(--cork);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0 0.04  0 0 0 1.1 -0.35'/></filter><rect width='100%25' height='100%25' filter='url(%23c)'/></svg>"),
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(60, 30, 10, 0.4));
+  box-shadow: inset 0 0 26px rgba(40, 20, 5, 0.55);
+}
+.pc {
+  position: absolute; width: 158px; padding: 16px 12px 14px; z-index: 1; margin: 0;
+  display: flex; flex-direction: column; gap: 3px; text-align: left; cursor: pointer;
+  border: 0; border-radius: 1px; color: var(--ink); background: var(--card);
+  transform: rotate(var(--r, 0deg)); transform-origin: 50% 9px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35), 0 10px 16px rgba(0, 0, 0, 0.22);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+.pc .loc { font: 700 9.5px/1.2 var(--f-ui); letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-soft); }
+.pc .nm { font: 400 19px/1.1 var(--f-type); margin-top: 4px; }
+.pc .role { font: 400 12.5px/1.25 var(--f-type); color: var(--ink-soft); }
+.pc.hero { background: #f2e38c; cursor: default; }
+.pc.off { opacity: 0.3; filter: grayscale(1); box-shadow: none; outline: 2px dashed rgba(43, 38, 34, 0.6); outline-offset: -2px; }
+.pc.add { outline: 5px solid var(--add); outline-offset: 2px; }
+.pc.drop { opacity: 0.55; filter: grayscale(1); outline: 5px dashed var(--drop); outline-offset: 2px; }
+.pc:focus-visible { outline: 4px solid var(--brass); outline-offset: 3px; }
+.pc .badge {
+  display: none; position: absolute; top: -14px; right: -12px; width: 34px; height: 34px; border-radius: 50%;
+  font: 700 26px/34px var(--f-ui); text-align: center; color: #1b1a14; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.pc.add .badge { display: block; background: var(--add); }
+.pc.add .badge::before { content: "+"; }
+.pc.drop .badge { display: block; background: var(--drop); color: #fff; }
+.pc.drop .badge::before { content: "−"; }
+.threads { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.threads.front { z-index: 2; }
+.thread { fill: none; stroke-width: 2.4; stroke-linecap: round; opacity: 0.9; }
+.thread.k-t { stroke: var(--thread); }
+.thread.k-h { stroke: var(--thread-hero); stroke-width: 2.8; }
+.thread.pend { stroke-dasharray: 10 7; stroke-width: 4; opacity: 1; }
+.preview-note { margin: 8px 0 0; color: var(--dim); font-size: 0.92rem; }
+
+/* Toggle list */
+.list { margin-top: 26px; display: grid; gap: 22px; }
+.list h2 { margin: 0 0 8px; font: 400 1.15rem/1.1 var(--f-marker); color: var(--label); }
+.togs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tog {
+  position: relative; min-height: 58px; padding: 9px 34px 9px 12px; text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  border-radius: 6px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); color: var(--dim);
+}
+.tog .t-name { font: 400 1.05rem/1.15 var(--f-type); color: var(--label); }
+.tog .t-role { font-size: 0.84rem; line-height: 1.2; }
+.tog::after {
+  content: ""; position: absolute; right: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+.tog.on { background: var(--card); border-color: var(--card); color: var(--ink-soft); }
+.tog.on .t-name { color: var(--ink); }
+.tog.on::after { border-color: #b5141d; background: radial-gradient(circle at 35% 35%, #fff 0, #d1382b 35%); }
+.tog.add { background: #3a3220; border: 2px solid var(--add); }
+.tog.add::after { content: "+"; width: auto; height: auto; border: 0; margin-top: -13px; font: 700 22px/1 var(--f-ui); color: var(--add); }
+.tog.drop { border: 2px dashed var(--drop); }
+.tog.drop .t-name { text-decoration: line-through; }
+.tog.drop::after { content: "−"; width: auto; height: auto; border: 0; margin-top: -13px; font: 700 22px/1 var(--f-ui); color: var(--drop); }
+.tog:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+
+/* Publish bar */
+.actions {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: rgba(20, 24, 22, 0.97); border-top: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.actions-in { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.summary { margin: 0; flex: 1 1 220px; font-size: 0.98rem; }
+.summary .plus { color: var(--add); font-weight: 700; }
+.summary .minus { color: var(--drop); font-weight: 700; }
+.btns { display: flex; gap: 8px; margin-left: auto; }
+.btn-ghost, .btn-main {
+  min-height: 46px; padding: 0 18px; border-radius: 999px; cursor: pointer; font-weight: 700; font-size: 1rem;
+}
+.btn-ghost { background: transparent; color: var(--label); border: 1px solid var(--line); }
+.btn-main { background: var(--brass); color: #1b1a14; border: 0; }
+.btn-ghost:disabled, .btn-main:disabled { opacity: 0.4; cursor: default; }
+.btn-ghost:focus-visible, .btn-main:focus-visible { outline: 3px solid var(--label); outline-offset: 2px; }
+.msg { margin: 6px auto 0; font-size: 0.94rem; color: var(--dim); min-height: 1.4em; }
+.msg.ok { color: var(--ok); }
+.msg.err { color: #ff9b8f; }
+.msg.warn { color: var(--brass); }
+
+/* QR */
+dialog {
+  border: 0; border-radius: 6px; padding: 22px; width: min(380px, calc(100vw - 32px));
+  background: var(--card); color: var(--ink); text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+dialog::backdrop { background: rgba(10, 12, 11, 0.75); }
+dialog h2 { margin: 0 0 4px; font: 400 1.5rem/1.1 var(--f-marker); }
+dialog p { margin: 0 0 12px; color: var(--ink-soft); }
+.qr-box svg { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.qr-url { margin-top: 10px !important; font: 400 0.95rem/1.3 var(--f-type); color: var(--ink) !important; word-break: break-all; }
+dialog button { margin-top: 6px; min-height: 44px; padding: 0 22px; border-radius: 999px; border: 0; background: var(--ink); color: var(--card); font-weight: 700; cursor: pointer; }
+
+@media (max-width: 560px) {
+  .togs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .frame { padding: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .pc { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="top wrap">
+  <p class="eyebrow">Who's Who at the Keep · DM only</p>
+  <h1>Reveal Board</h1>
+  <p class="intro">Tap the people the party has met, then press Publish. Their cards go up on the players' phones within about a minute, along with every thread between people the party has met.</p>
+  <div class="links">
+    <a class="pill" href="../" target="_blank" rel="noopener">Open the players' page ↗</a>
+    <button class="pill" type="button" id="qr-open">Show the QR code</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="conn" class="conn" aria-live="polite"></section>
+
+  <div class="live">
+    <p id="live-line">Checking what the players can see…</p>
+    <div class="tools">
+      <button class="pill" type="button" id="reset">Back to the starting cast</button>
+    </div>
+  </div>
+
+  <div class="preview-scroll" id="pscroll">
+    <div class="frame" id="frame"><div class="board" id="board"></div></div>
+  </div>
+  <p class="preview-note">Faded cards are still hidden from the players. Gold outline: about to be revealed. Red dashes: about to be hidden. Dashed threads appear once you publish.</p>
+
+  <div class="list" id="list"></div>
+</main>
+
+<div class="actions">
+  <div class="wrap actions-in">
+    <p class="summary" id="summary">Loading…</p>
+    <div class="btns">
+      <button class="btn-ghost" type="button" id="undo" disabled>Undo</button>
+      <button class="btn-main" type="button" id="publish" disabled>Publish</button>
+    </div>
+  </div>
+  <p class="wrap msg" id="msg" role="status"></p>
+</div>
+
+<dialog id="qr" aria-labelledby="qr-title">
+  <h2 id="qr-title">Who's Who at the Keep</h2>
+  <p>Point a phone camera here.</p>
+  <div class="qr-box" id="qr-box"></div>
+  <p class="qr-url" id="qr-url"></p>
+  <form method="dialog"><button type="submit">Close</button></form>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const PEOPLE = [
+  { id: "gala", c: 0, r: 0, g: "keep", loc: "Outer Gatehouse", name: "Gala", role: "Gate guard",
+    q: "“That's against at least four laws.”",
+    about: "Guards the outer gate and can quote every law of the Keep by number." },
+  { id: "bartho", c: 1, r: 0, g: "keep", loc: "Outer Gatehouse", name: "Bartho", role: "Gate guard",
+    q: "“Is it shift change yet?”",
+    about: "Guards the outer gate, when he's awake. Lubik once put him in the stocks for three days for napping on watch." },
+  { id: "lubik", c: 2, r: 0, g: "dead", style: "dead", loc: "Died last winter", name: "Lubik", role: "Castellan before Winvarle",
+    q: "“The gates shall close at dusk.”", stamp: "DECEASED",
+    about: "Ran the Keep before Winvarle. He shut the gates on the refugees, gave Sune's temple to Tyr, and kept the Keep alive. He died on the wall last winter. Everyone has an opinion about him." },
+  { id: "winvarle", c: 3, r: 0, g: "keep", loc: "Fortress", name: "Winvarle", role: "Castellan of the Keep",
+    q: "Talks in speeches.",
+    about: "The new Castellan. He opened the gates again and is striking out Lubik's harshest laws one by one. Look for the “W.” on the gate notice." },
+  { id: "elandra", c: 4, r: 0, g: "keep", loc: "Fortress", name: "Elandra", role: "Elf adviser to the Castellan",
+    q: "A long-suffering sigh.",
+    about: "An elf who advises the Castellan. She has advised the castellans before him too, and has opinions about all of them." },
+  { id: "xanthe", c: 5, r: 0, g: "out", loc: "Hut in the woods", name: "Xanthe", role: "Old elf druid",
+    q: "Talks in riddles.", stamp: "EXILED",
+    about: "An old elf druid who lives alone in the woods. The Keep exiled her for worshipping Chaos. She raised the ranger, and the ranger knows her better than anyone." },
+  { id: "jacko", c: 6, r: 0, g: "out", loc: "The fens", name: "Jacko", role: "Halfling fence",
+    q: "“Jacko always has your back-o.”",
+    about: "A halfling fence who works out of the fens. He buys, he sells, and he knows things, all for a price. The rogue's old fence." },
+  { id: "krentz", c: 7, r: 0, g: "out", loc: "Waterdeep, Dock Ward", name: "Krentz", role: "Xanathar Guild crew boss",
+    q: "“YOU OWE.”",
+    about: "Runs a Xanathar Guild crew in Waterdeep's Dock Ward. Bald, with eyes tattooed all over his scalp. The rogue used to work for him, and ran." },
+
+  { id: "andrella", c: 0, r: 1, g: "keep", loc: "Inner Gatehouse", name: "Andrella", role: "Captain of the guard",
+    q: "Perfect posture. Never sits.",
+    about: "Captain of the guard at the Inner Gatehouse. She served under Lubik. Captain Doran of the caravan is her older brother." },
+  { id: "shannik", c: 1, r: 1, g: "keep", loc: "Inner Bailey", name: "Shannik", role: "Soldier of the Keep",
+    q: "Grunts.",
+    about: "A soldier of the Keep and Lubik's old protégé. He still thinks Lubik was the best commander the Keep ever had." },
+  { id: "lenk", c: 2, r: 1, g: "keep", loc: "Private Apartments", name: "Lenk", role: "Jeweler and landlord",
+    q: "“Flawed.”",
+    about: "A jeweler who squints at everything through his loupe. He rents out rooms in the private apartments." },
+  { id: "dewran", c: 3, r: 1, g: "keep", loc: "Fortress", name: "Dewran", role: "Dwarf scribe to the Castellan",
+    q: "“Hm.”",
+    about: "The Castellan's scribe. He keeps the Keep's ledgers and rarely looks up from them. Winvarle trusts him completely." },
+  { id: "toryn", c: 4, r: 1, g: "keep", loc: "Guild House", name: "Toryn", role: "Guild master and librarian",
+    q: "“Freedom by argument, not by fire.”",
+    about: "Runs the Guild House and its library. She always gets the last word, and she outlasted Lubik's attempt to shut her guild down." },
+  { id: "serah", c: 5, r: 1, g: "vanguard", short: "Serah", loc: "Iron Vanguard", name: "Serah Vayne", role: "Iron Vanguard",
+    q: "Always has a book open.",
+    about: "A member of the Iron Vanguard, the adventuring company based at the Keep. Practically lives in Toryn's library." },
+  { id: "velrith", c: 6, r: 1, g: "vanguard", short: "Velrith", loc: "Iron Vanguard", name: "Velrith Zauvirr", role: "Iron Vanguard, drow",
+    q: "Sits with his back to the wall.",
+    about: "A quiet drow in the Iron Vanguard who notices everything. Spends his spare time at the stables with Cornflower." },
+
+  { id: "oleira", c: 0, r: 2, g: "keep", loc: "Trader's Shop", name: "Oleira", role: "Trader",
+    q: "Calls everyone “dear.”",
+    about: "Runs the Trader's Shop with her two teenage sons, Derlo and Ulmar. If there's gossip in the Keep, she's heard it." },
+  { id: "quink", c: 1, r: 2, g: "keep", loc: "Bank", name: "Quink", role: "Banker",
+    q: "Talks in numbers.",
+    about: "Runs the Keep's bank. Ruckus is her nephew, and he owes her bank money." },
+  { id: "kalista", c: 2, r: 2, g: "keep", loc: "Smithy", name: "Kalista", role: "Dwarf smith",
+    q: "A hammer strike instead of an answer.",
+    about: "The Keep's smith. She answers most questions with her hammer." },
+  { id: "yvette", c: 3, r: 2, g: "keep", loc: "Bank", name: "Yvette", role: "Bank guard",
+    q: "Says as little as possible.",
+    about: "Guards Quink's bank." },
+  { id: "ivlis", c: 4, r: 2, g: "keep", loc: "The temple", name: "Ivlis", role: "Priestess of Sune",
+    q: "“Love is a slow fire.”",
+    about: "The cleric's teacher in Sune's faith, and the reason the cleric is coming home: her letters asked them to. When Lubik shut the gates, she and Cornflower hid refugee families anyway." },
+  { id: "fazzir", c: 5, r: 2, g: "keep", loc: "Temple", name: "Fazzir", role: "Priest of Tyr",
+    q: "Calls everyone “friend.”",
+    about: "Keeps the temple that used to be Sune's, now Tyr's. Ivlis taught him, and he studied beside the cleric. He asked Lysa to bring a new copy of the Codex to the temple." },
+  { id: "folio", c: 6, r: 2, g: "evidence", style: "vellum", short: "Folio XLI", loc: "The Codex", name: "Folio XLI", role: "An entry in the Codex Relictorum",
+    q: "“a stone in which a mind sleeps”",
+    about: "One entry in the Codex Relictorum that Lysa is carrying. The index calls it the Stone of Golorr. Lysa thinks it's the most exciting page in the book." },
+  { id: "brom", c: 7, r: 2, g: "vanguard", short: "Brom", loc: "Iron Vanguard", name: "Brom Halvek", role: "Iron Vanguard, dwarf cleric",
+    q: "Loud and warm. Toasts the dead.",
+    about: "A dwarf cleric in the Iron Vanguard. Drinks with Kalista and is friends with Fazzir." },
+
+  { id: "derlo", c: 0, r: 3, g: "keep", loc: "Trader's Shop", name: "Derlo", role: "Oleira's son",
+    q: "Dreams of being a knight.",
+    about: "Oleira's son. He'd rather be a knight than a shopkeeper." },
+  { id: "ulmar", c: 1, r: 3, g: "keep", loc: "Trader's Shop", name: "Ulmar", role: "Oleira's son",
+    q: "Carries Martial's shield around the bailey.",
+    about: "Oleira's other son. He worships the Iron Vanguard and carries Martial's shield whenever he's allowed." },
+  { id: "ruckus", c: 2, r: 3, g: "keep", loc: "Provisioner's Shop", name: "Ruckus", role: "Provisioner",
+    q: "Shouts up at tall people.",
+    about: "Runs the Provisioner's Shop: rope, rations, lanterns, everything an adventurer forgets. Quink is his aunt." },
+  { id: "cornflower", c: 3, r: 3, g: "keep", loc: "Barn", name: "Cornflower", role: "Keeps the barn",
+    q: "“please!! the goats especially”",
+    about: "Keeps the barn and the Keep's animals, and talks in animal sayings. When Lubik shut the gates, she hid refugee families in her hayloft. Jacko is her estranged brother." },
+  { id: "martial", c: 4, r: 3, g: "vanguard", loc: "Iron Vanguard", name: "Martial", role: "Leader of the Iron Vanguard",
+    q: "“…Not yet. You're not ready.”",
+    about: "Leads the Iron Vanguard. Calm, unbeatable, and wears a dented silver gauntlet. He trained the fighter in the Daggerford militia and wrote asking them to come." },
+  { id: "umbrusk", c: 5, r: 3, g: "keep", loc: "The Drunken Dragon", name: "Umbrusk", role: "Barkeep",
+    q: "“Never forget a face.”",
+    about: "Runs the Drunken Dragon tavern. He wipes the same mug over and over, and he never forgets a face." },
+  { id: "haldryck", c: 6, r: 3, g: "keep", loc: "Traveler's Inn", name: "Haldryck", role: "Innkeeper",
+    q: "Calls everything a “luxury amenity.”",
+    about: "Runs the Traveler's Inn and is proud of every bedbug. He used to go hunting with the ranger." },
+  { id: "mallyn", c: 7, r: 3, g: "out", loc: "Trails outside the Keep", name: "Mallyn", role: "Wanderer",
+    q: "“Might you be adventurers?”",
+    about: "A wanderer you might meet on the trails around the Keep. Umbrusk's niece. She loves a good story." },
+
+  { id: "doran", c: 0, r: 4, g: "caravan", short: "Doran", loc: "The caravan", name: "Captain Doran", role: "Caravan captain",
+    q: "“Who trained you? …Martial? Then you'll live.”",
+    about: "Leads the caravan from Daggerford to the Keep. An old friend of Martial's, and Andrella's older brother. The ranger scouts for him." },
+  { id: "lysa", c: 1, r: 4, g: "caravan", loc: "The caravan", name: "Lysa", role: "Carrying the Codex Relictorum",
+    q: "“I can pay you in friendship and pie.”",
+    about: "The wizard's oldest friend. She's carrying a new copy of the Codex Relictorum to the Keep's temple for Fazzir." },
+
+  { id: "fighter", c: 2, r: 4, g: "party", style: "hero", name: "Fighter", q: "The Last Recruit",
+    about: "Trained in the Daggerford militia by Martial, the only recruit he ever called good. On the caravan to answer his letter: “I need someone I trust.”" },
+  { id: "cleric", c: 3, r: 4, g: "party", style: "hero", name: "Cleric", q: "The Ember",
+    about: "Ivlis's best student, sent to Daggerford to keep Sune's flame alive. Called home by her letters." },
+  { id: "wizard", c: 4, r: 4, g: "party", style: "hero", name: "Wizard", q: "Folio Forty-One",
+    about: "Lysa's oldest friend, hired to keep the Codex's old curses from biting her." },
+  { id: "rogue", c: 5, r: 4, g: "party", style: "hero", name: "Rogue", q: "Eyes in the Crowd",
+    about: "Ran small jobs in Waterdeep's Dock Ward for Krentz, then ran from the Xanathar Guild. Jacko pointed them to the Borderlands." },
+  { id: "ranger", c: 6, r: 4, g: "party", style: "hero", name: "Ranger", q: "The Hermit's Student",
+    about: "Raised in the wilds by Xanthe; now an outrider for Doran's caravan. This is their first trip back since her exile." },
+];
+
+/* Threads: t = what anyone at the Keep could tell you, h = a hero's own tie. */
+const L = (a, b, k, l) => ({ a, b, k, l });
+const LINKS = [
+  L("bartho", "gala", "t", "partners on the gate"),
+  L("bartho", "umbrusk", "t", "works off a bar tab"),
+  L("bartho", "lubik", "t", "three days in the stocks"),
+  L("bartho", "ivlis", "t", "she brought him soup"),
+  L("gala", "andrella", "t", "mentor and admirer"),
+  L("gala", "lubik", "t", "she still quotes his laws"),
+  L("cornflower", "ivlis", "t", "hid refugees together"),
+  L("cornflower", "jacko", "t", "estranged siblings"),
+  L("cornflower", "velrith", "t", "friends at the stables"),
+  L("lenk", "dewran", "t", "landlord and tenant"),
+  L("lenk", "quink", "t", "rival misers"),
+  L("kalista", "brom", "t", "drinking partners"),
+  L("ruckus", "quink", "t", "aunt and nephew"),
+  L("oleira", "derlo", "t", "mother and son"),
+  L("oleira", "ulmar", "t", "mother and son"),
+  L("oleira", "shannik", "t", "close, maybe more"),
+  L("oleira", "xanthe", "t", "she calls her a cult witch"),
+  L("ulmar", "martial", "t", "carries his shield"),
+  L("yvette", "quink", "t", "guards her bank"),
+  L("haldryck", "umbrusk", "t", "food rivals"),
+  L("umbrusk", "mallyn", "t", "uncle and niece"),
+  L("umbrusk", "martial", "t", "his regular table"),
+  L("toryn", "shannik", "t", "political enemies"),
+  L("toryn", "serah", "t", "lives in her library"),
+  L("toryn", "ivlis", "t", "traded books"),
+  L("toryn", "lubik", "t", "he tried to close her guild"),
+  L("fazzir", "ivlis", "t", "student and teacher"),
+  L("fazzir", "lysa", "t", "he sent her for the Codex"),
+  L("fazzir", "brom", "t", "friends"),
+  L("andrella", "doran", "t", "sister and brother"),
+  L("andrella", "martial", "t", "served under Lubik together"),
+  L("shannik", "lubik", "t", "protégé and mentor"),
+  L("shannik", "velrith", "t", "he doesn't trust him"),
+  L("winvarle", "dewran", "t", "trusts him completely"),
+  L("winvarle", "lubik", "t", "took command when he fell"),
+  L("elandra", "winvarle", "t", "his adviser"),
+  L("elandra", "xanthe", "t", "old friends"),
+  L("martial", "brom", "t", "Iron Vanguard"),
+  L("martial", "velrith", "t", "Iron Vanguard"),
+  L("martial", "serah", "t", "Iron Vanguard"),
+  L("martial", "doran", "t", "old friends"),
+  L("ivlis", "lubik", "t", "she defied his closed gates"),
+  L("lysa", "folio", "t", "she's carrying it"),
+
+  L("fighter", "martial", "h", "trained them in the militia"),
+  L("cleric", "ivlis", "h", "best student and mentor"),
+  L("cleric", "fazzir", "h", "fellow students"),
+  L("cleric", "cornflower", "h", "hid families together"),
+  L("wizard", "lysa", "h", "oldest friends"),
+  L("wizard", "folio", "h", "Lysa showed them the page"),
+  L("rogue", "krentz", "h", "the boss they ran from"),
+  L("rogue", "jacko", "h", "their old fence"),
+  L("ranger", "xanthe", "h", "she raised them"),
+  L("ranger", "haldryck", "h", "hunting partners"),
+  L("ranger", "doran", "h", "scouts for his caravan"),
+];
+
+const GROUPS = [
+  ["Your party", ["fighter", "cleric", "wizard", "rogue", "ranger"]],
+  ["The caravan", ["doran", "lysa", "folio"]],
+  ["The gates", ["gala", "bartho", "andrella", "shannik"]],
+  ["The fortress", ["winvarle", "elandra", "dewran"]],
+  ["The Iron Vanguard", ["martial", "brom", "velrith", "serah"]],
+  ["Temple and Guild House", ["ivlis", "fazzir", "toryn"]],
+  ["Shops and the bank", ["oleira", "derlo", "ulmar", "ruckus", "quink", "yvette", "lenk"]],
+  ["Smithy and barn", ["kalista", "cornflower"]],
+  ["Tavern and inn", ["umbrusk", "haldryck"]],
+  ["Outside the walls", ["xanthe", "jacko", "mallyn", "krentz"]],
+  ["Remembered", ["lubik"]],
+];
+
+const PIN = { keep: "#d1382b", vanguard: "#2f63b8", out: "#2b2b2b", party: "#e8b923", evidence: "#2f8a4e", dead: "#ececec", caravan: "#e07a2a" };
+const KIND = { t: "var(--thread)", h: "var(--thread-hero)" };
+const BW = 1515, BH = 1290;
+const X = c => 100 + c * 187.5;
+const Y = r => 100 + r * 250;
+
+const SITE = "https://deniztuglu.github.io/borderlands/";
+const OWNER = "deniztuglu", REPO = "borderlands", FILE = "reveal.json", BRANCH = "main";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+const AUTHOR = { name: "DenizTuglu", email: "112865086+deniztuglu@users.noreply.github.com" };
+const TOKEN_KEY = "keep-reveal-token";
+
+const byId = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+const ORDER = PEOPLE.map(p => p.id);
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function rnd(id, salt) {
+  let h = 2166136261;
+  for (const ch of id + salt) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 1000) / 1000;
+}
+const HEROES = PEOPLE.filter(p => p.style === "hero").map(p => p.id);
+const START = [...new Set(LINKS.filter(l => l.k === "h").flatMap(l => [l.a, l.b]))].filter(id => !HEROES.includes(id));
+const cleanIds = a => (Array.isArray(a) ? a : []).filter(id => typeof id === "string" && byId[id] && !HEROES.includes(id));
+
+let token = "";
+try { token = localStorage.getItem(TOKEN_KEY) || ""; } catch (e) {}
+let live = null;          /* what the players can see now (heroes included) */
+let draft = new Set();    /* what they will see after Publish */
+let sha = null;
+let busy = false;
+
+/* Board preview */
+const board = $("board"), frame = $("frame"), pscroll = $("pscroll");
+const pins = {};
+PEOPLE.forEach(p => {
+  const cx = X(p.c) + (rnd(p.id, "x") - 0.5) * 20;
+  const top = Y(p.r) + (rnd(p.id, "y") - 0.5) * 26;
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "pc" + (p.style === "hero" ? " hero" : "");
+  el.dataset.id = p.id;
+  el.style.left = (cx - 79) + "px";
+  el.style.top = top + "px";
+  el.style.setProperty("--r", ((rnd(p.id, "r") - 0.5) * 6).toFixed(2) + "deg");
+  el.innerHTML = `<span class="badge" aria-hidden="true"></span><span class="loc">${esc(p.style === "hero" ? "The party" : p.loc)}</span><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.style === "hero" ? p.q : p.role)}</span>`;
+  el.tabIndex = -1; /* the list below is the keyboard and screen-reader route */
+  el.setAttribute("aria-hidden", "true");
+  el.addEventListener("click", () => toggle(p.id));
+  board.appendChild(el);
+  pins[p.id] = { x: cx, y: top + 9, g: p.g };
+});
+const SVGNS = "http://www.w3.org/2000/svg";
+function layer(cls) {
+  const el = document.createElementNS(SVGNS, "svg");
+  el.setAttribute("class", "threads " + cls);
+  el.setAttribute("viewBox", `0 0 ${BW} ${BH}`);
+  el.setAttribute("width", BW);
+  el.setAttribute("height", BH);
+  el.setAttribute("aria-hidden", "true");
+  return el;
+}
+const back = layer("back");
+board.insertBefore(back, board.firstChild);
+const front = layer("front");
+board.appendChild(front);
+const pinGrad = Object.entries(PIN).map(([k, c]) =>
+  `<radialGradient id="pin-${k}" cx="0.35" cy="0.35" r="0.75"><stop offset="0" stop-color="#fff" stop-opacity="0.9"/><stop offset="0.25" stop-color="${c}"/><stop offset="1" stop-color="${c}"/></radialGradient>`).join("");
+front.innerHTML = `<defs>${pinGrad}</defs><g class="pins"></g>`;
+function curve(a, b) {
+  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  const sag = Math.min(70, d * 0.09);
+  return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${((a.x + b.x) / 2).toFixed(1)} ${((a.y + b.y) / 2 + sag).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+}
+const threads = LINKS.map(l => ({ ...l, d: curve(pins[l.a], pins[l.b]) }));
+const shownIn = set => threads.filter(t => set.has(t.a) && set.has(t.b));
+
+function fit() {
+  const avail = pscroll.clientWidth;
+  if (avail) frame.style.zoom = Math.max(0.15, Math.min(0.9, avail / (BW + 28))).toFixed(3);
+}
+new ResizeObserver(fit).observe(pscroll);
+
+/* Toggle list (everyone except the party, who are always on the board) */
+const listEl = $("list");
+listEl.innerHTML = GROUPS.filter(([, ids]) => ids.some(id => !HEROES.includes(id))).map(([label, ids]) =>
+  `<section><h2>${esc(label)}</h2><div class="togs">${ids.filter(id => !HEROES.includes(id)).map(id =>
+    `<button type="button" class="tog" data-id="${id}" aria-pressed="false"><span class="t-name">${esc(byId[id].name)}</span><span class="t-role">${esc(byId[id].role)}</span></button>`).join("")}</div></section>`).join("");
+listEl.addEventListener("click", e => { const b = e.target.closest(".tog"); if (b) toggle(b.dataset.id); });
+
+function stateOf(id) {
+  const a = live && live.has(id), b = draft.has(id);
+  return a && b ? "on" : b ? "add" : a ? "drop" : "off";
+}
+function toggle(id) {
+  if (!live || busy || HEROES.includes(id)) return;
+  if (draft.has(id)) draft.delete(id); else draft.add(id);
+  render();
+}
+function nameList(ids) {
+  const n = ids.map(id => byId[id].name);
+  if (n.length <= 1) return n.join("");
+  if (n.length <= 4) return n.slice(0, -1).join(", ") + " and " + n[n.length - 1];
+  return `${n.slice(0, 3).join(", ")} and ${n.length - 3} more`;
+}
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+function render() {
+  const liveSet = live || new Set(HEROES);
+  board.querySelectorAll(".pc").forEach(el => {
+    const s = HEROES.includes(el.dataset.id) ? "on" : stateOf(el.dataset.id);
+    el.classList.remove("on", "add", "drop", "off");
+    el.classList.add(s);
+  });
+  listEl.querySelectorAll(".tog").forEach(el => {
+    const s = stateOf(el.dataset.id);
+    el.classList.remove("on", "add", "drop", "off");
+    el.classList.add(s);
+    el.setAttribute("aria-pressed", String(draft.has(el.dataset.id)));
+    const p = byId[el.dataset.id];
+    el.setAttribute("aria-label", `${p.name}, ${p.role}. ${s === "on" ? "Revealed" : s === "add" ? "Will be revealed when you publish" : s === "drop" ? "Will be hidden when you publish" : "Hidden"}.`);
+  });
+  const liveKeys = new Set(shownIn(liveSet).map(t => t.a + "~" + t.b));
+  back.innerHTML = shownIn(draft).map(t =>
+    `<path class="thread k-${t.k}${liveKeys.has(t.a + "~" + t.b) ? "" : " pend"}" d="${t.d}"/>`).join("");
+  front.querySelector(".pins").innerHTML = Object.entries(pins).filter(([id]) => draft.has(id)).map(([id, p]) =>
+    `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><ellipse cx="2.5" cy="4" rx="7" ry="5" fill="rgba(0,0,0,0.35)"/><circle r="7.5" fill="url(#pin-${p.g})" stroke="rgba(0,0,0,0.45)" stroke-width="0.8"/></g>`).join("");
+
+  if (live) {
+    const met = [...live].filter(id => !HEROES.includes(id)).length;
+    $("live-line").innerHTML = `The players can see <b>${plural(met, "person", "people")}</b> and <b>${plural(shownIn(live).length, "thread", "threads")}</b>.`;
+  }
+  const add = ORDER.filter(id => stateOf(id) === "add");
+  const drop = ORDER.filter(id => stateOf(id) === "drop");
+  const tNew = shownIn(draft).filter(t => !liveKeys.has(t.a + "~" + t.b)).length;
+  const tLost = shownIn(liveSet).filter(t => !(draft.has(t.a) && draft.has(t.b))).length;
+  const parts = [];
+  if (add.length) parts.push(`<span class="plus">Reveal ${esc(nameList(add))}</span>`);
+  if (drop.length) parts.push(`<span class="minus">Hide ${esc(nameList(drop))}</span>`);
+  if (tNew) parts.push(`<span class="plus">+${plural(tNew, "thread", "threads")}</span>`);
+  if (tLost) parts.push(`<span class="minus">−${plural(tLost, "thread", "threads")}</span>`);
+  const changed = add.length + drop.length > 0;
+  $("summary").innerHTML = !live ? "Loading…" : changed ? parts.join(" · ") : "No changes. Tap the people the party has just met.";
+  $("undo").disabled = !changed || busy;
+  $("publish").disabled = !changed || busy;
+  $("publish").textContent = token ? (busy ? "Publishing…" : "Publish") : "Connect to publish";
+  if (!token) $("publish").disabled = !changed;
+}
+
+/* Messages */
+function setMsg(text, kind) {
+  const m = $("msg");
+  m.textContent = text || "";
+  m.className = "wrap msg" + (kind ? " " + kind : "");
+}
+
+/* GitHub */
+const toB64 = s => btoa(unescape(encodeURIComponent(s)));
+const fromB64 = s => decodeURIComponent(escape(atob(String(s).replace(/\s/g, ""))));
+const parseIds = text => cleanIds(JSON.parse(text).revealed);
+const ghHeaders = () => ({ Accept: "application/vnd.github+json", Authorization: `Bearer ${token}` });
+function apiError(status) {
+  const m = {
+    401: "GitHub didn't accept the token. It may be mistyped or expired.",
+    403: "The token can read the repo but not change it. Give it Contents: Read and write.",
+    404: "The token can't see the borderlands repo. Check its repository access.",
+    409: "The board changed on GitHub at the same moment. Press Publish again.",
+    422: "GitHub turned the update down. Reload this page and try again.",
+  };
+  return new Error(m[status] || `GitHub answered with an error (${status}). Try again in a moment.`);
+}
+const netError = e => e instanceof TypeError ? new Error("Couldn't reach GitHub. Check the internet connection and try again.") : e;
+async function apiGet() {
+  const res = await fetch(`${API}?ref=${BRANCH}`, { cache: "no-store", headers: ghHeaders() }).catch(e => { throw netError(e); });
+  if (!res.ok) throw apiError(res.status);
+  const j = await res.json();
+  return { sha: j.sha, ids: parseIds(fromB64(j.content)) };
+}
+async function pagesGet() {
+  const res = await fetch(`../${FILE}?t=${Date.now()}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Couldn't read the players' board.");
+  return parseIds(await res.text());
+}
+function put(text, message) {
+  return fetch(API, {
+    method: "PUT",
+    headers: { ...ghHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ message, content: toB64(text), sha: sha || undefined, branch: BRANCH, committer: AUTHOR, author: AUTHOR }),
+  }).catch(e => { throw netError(e); });
+}
+
+async function loadLive() {
+  let ids = null, err = "";
+  if (token) {
+    try { const r = await apiGet(); sha = r.sha; ids = r.ids; } catch (e) { err = e.message; }
+  }
+  if (!ids) {
+    try { ids = await pagesGet(); } catch (e) { if (!err) err = e.message; }
+  }
+  live = new Set([...HEROES, ...(ids || START)]);
+  draft = new Set(live);
+  render();
+  setMsg(err, err ? "err" : "");
+}
+
+let watch = 0;
+async function confirmLive(ids) {
+  const mine = ++watch;
+  const want = JSON.stringify([...ids].sort());
+  for (let i = 0; i < 24; i++) {
+    await new Promise(r => setTimeout(r, 8000));
+    if (mine !== watch) return;
+    try {
+      const got = await pagesGet();
+      if (JSON.stringify([...got].sort()) === want) {
+        setMsg("Live. Open phones pick it up within 30 seconds; others the moment the page opens.", "ok");
+        return;
+      }
+    } catch (e) {}
+  }
+  if (mine === watch) setMsg("Saved on GitHub, but the site hasn't caught up after three minutes. GitHub Pages is sometimes slow; it will get there.", "warn");
+}
+
+async function publish() {
+  if (!token) { $("conn").scrollIntoView({ behavior: "smooth", block: "start" }); const t = $("tok"); if (t) t.focus({ preventScroll: true }); return; }
+  const ids = ORDER.filter(id => draft.has(id) && !HEROES.includes(id));
+  const add = ORDER.filter(id => stateOf(id) === "add");
+  const drop = ORDER.filter(id => stateOf(id) === "drop");
+  if (!add.length && !drop.length) return;
+  const message = [add.length ? "Reveal " + nameList(add) : "", drop.length ? "Hide " + nameList(drop) : ""].filter(Boolean).join("; ");
+  const text = JSON.stringify({ revealed: ids, updated: new Date().toISOString() }, null, 2) + "\n";
+  busy = true; render(); setMsg("Publishing…");
+  try {
+    if (!sha) sha = (await apiGet()).sha;
+    let res = await put(text, message);
+    if (res.status === 409 || res.status === 422) { sha = (await apiGet()).sha; res = await put(text, message); }
+    if (!res.ok) throw apiError(res.status);
+    sha = (await res.json()).content.sha;
+    live = new Set(draft);
+    setMsg("Saved. The players' phones will show it within about a minute.", "ok");
+    confirmLive(ids);
+  } catch (e) {
+    setMsg(e.message, "err");
+  } finally {
+    busy = false; render();
+  }
+}
+
+/* Connection panel */
+function renderConn() {
+  const el = $("conn");
+  if (token) {
+    el.className = "conn ok";
+    el.innerHTML = `<p><b>Connected.</b> This device can publish reveals.</p><button type="button" class="linkish" id="forget">Forget the token on this device</button>`;
+    $("forget").addEventListener("click", () => {
+      token = ""; sha = null;
+      try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+      renderConn(); render(); setMsg("Token removed from this device.");
+    });
+    return;
+  }
+  el.className = "conn";
+  el.innerHTML = `<h2>Connect this device</h2>
+    <p>Publishing needs a GitHub token that can change one file in your <b>borderlands</b> repo. You make it once, and each device you run the board on keeps its own copy.</p>
+    <ol>
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub's new fine-grained token page</a>.</li>
+      <li>Name it <i>Keep reveal board</i> and set the expiration to after the campaign ends.</li>
+      <li>Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick <b>borderlands</b>.</li>
+      <li>Under <b>Permissions → Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
+      <li>Press <b>Generate token</b>, copy it, and paste it below.</li>
+    </ol>
+    <form id="tok-form" autocomplete="off">
+      <label for="tok">Token</label>
+      <div class="tok-row"><input id="tok" type="password" spellcheck="false" autocapitalize="off" placeholder="github_pat_…"><button type="submit">Save</button></div>
+    </form>
+    <p class="small">The token stays in this browser on this device and is only sent to GitHub. It can't touch anything outside the borderlands repo.</p>`;
+  $("tok-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const v = $("tok").value.trim();
+    if (!v) return;
+    token = v;
+    setMsg("Checking the token…");
+    try {
+      const r = await apiGet();
+      sha = r.sha;
+    } catch (err) {
+      token = "";
+      setMsg(err.message, "err");
+      return;
+    }
+    let kept = true;
+    try { localStorage.setItem(TOKEN_KEY, token); } catch (err) { kept = false; }
+    renderConn();
+    await loadLive();
+    setMsg(kept ? "Connected. Tap people, then Publish." : "Connected for now, but this browser won't remember the token after you close it.", kept ? "ok" : "warn");
+  });
+}
+
+/* QR */
+function qrSvg(text) {
+  if (typeof qrcode !== "function") return "";
+  const qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  const n = qr.getModuleCount(), q = 4, size = n + q * 2;
+  let d = "";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + q} ${r + q}h1v1h-1z`;
+  return `<svg viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img" aria-label="QR code for ${esc(text)}"><rect width="${size}" height="${size}" fill="#fff"/><path d="${d}" fill="#111"/></svg>`;
+}
+$("qr-open").addEventListener("click", () => {
+  $("qr-box").innerHTML = qrSvg(SITE) || "<p>The QR code needs an internet connection. Read the address out instead:</p>";
+  $("qr-url").textContent = SITE.replace(/^https:\/\//, "");
+  $("qr").showModal();
+});
+
+$("undo").addEventListener("click", () => { if (live) { draft = new Set(live); render(); setMsg(""); } });
+$("publish").addEventListener("click", publish);
+$("reset").addEventListener("click", () => {
+  if (!live) return;
+  draft = new Set([...HEROES, ...START]);
+  render();
+  setMsg("Draft set to the starting cast: the heroes and everyone they know from their backstories. Publish to apply.");
+});
+window.addEventListener("beforeunload", e => {
+  if (live && ORDER.some(id => stateOf(id) === "add" || stateOf(id) === "drop")) { e.preventDefault(); e.returnValue = ""; }
+});
+
+renderConn();
+render();
+fit();
+loadLive();
+</script>
+</body>
+</html>
