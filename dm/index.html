@@ -108,7 +108,7 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.2rem)/1.02 var(--f-marker); }
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.12);
 }
 .board {
-  position: relative; width: 1515px; height: 1290px; overflow: hidden;
+  position: relative; width: 1515px; height: 1510px; overflow: hidden;
   background-color: var(--cork);
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0 0.04  0 0 0 1.1 -0.35'/></filter><rect width='100%25' height='100%25' filter='url(%23c)'/></svg>"),
@@ -171,6 +171,12 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.2rem)/1.02 var(--f-marker); }
 .tog.drop .t-name { text-decoration: line-through; }
 .tog.drop::after { content: "−"; width: auto; height: auto; border: 0; margin-top: -13px; font: 700 22px/1 var(--f-ui); color: var(--drop); }
 .tog:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+.tog.has-face { padding-left: 62px; }
+.tog .t-face {
+  position: absolute; left: 8px; top: 50%; width: 44px; height: 44px; margin-top: -22px; border-radius: 4px;
+  object-fit: cover; background: #fff; opacity: 0.5; filter: grayscale(0.7);
+}
+.tog.on .t-face, .tog.add .t-face { opacity: 1; filter: none; }
 
 /* Publish bar */
 .actions {
@@ -457,11 +463,26 @@ const GROUPS = [
   ["Remembered", ["lubik"]],
 ];
 
+/* NPC cards: the line on each card's orange band. Art lives in cards/: the official starter-set card art
+   (jpg), or a homemade silhouette (svg) for the characters the set has no card for. */
+const CARDS = {
+  gala: "Human Gate Guard", bartho: "Human Gate Guard", andrella: "Human Captain of the Guard", shannik: "Human Sergeant of the Guard",
+  winvarle: "Human Castellan", elandra: "Elf Adviser", dewran: "Dwarf Scribe", lenk: "Human Jeweler", toryn: "Human Guild Master",
+  oleira: "Human Shopkeeper", quink: "Halfling Banker", kalista: "Dwarf Blacksmith", yvette: "Human Bank Guard", fazzir: "Human Priest",
+  ruckus: "Halfling Shopkeeper", cornflower: "Halfling Barn Hand", umbrusk: "Human Barkeep", haldryck: "Dwarf Innkeeper",
+  mallyn: "Human Traveler", xanthe: "Elf Hermit",
+  lysa: "Human Scholar", doran: "Human Caravan Captain", martial: "Human Vanguard Leader", brom: "Dwarf Cleric",
+  velrith: "Drow Adventurer", serah: "Human Adventurer", derlo: "Human Would-Be Knight", ulmar: "Human Shield Bearer",
+  ivlis: "Human Priestess", jacko: "Halfling Fence", krentz: "Human Crew Boss", lubik: "Human Former Castellan",
+};
+const HOMEMADE = new Set(["lysa", "doran", "martial", "brom", "velrith", "serah", "derlo", "ulmar", "ivlis", "jacko", "krentz", "lubik"]);
+const cardArt = (id, face) => `cards/${id}${face ? "-face" : ""}.${HOMEMADE.has(id) ? "svg" : "jpg"}`;
+
 const PIN = { keep: "#d1382b", vanguard: "#2f63b8", out: "#2b2b2b", party: "#e8b923", evidence: "#2f8a4e", dead: "#ececec", caravan: "#e07a2a" };
 const KIND = { t: "var(--thread)", h: "var(--thread-hero)" };
-const BW = 1515, BH = 1290;
+const BW = 1515, BH = 1510;
 const X = c => 100 + c * 187.5;
-const Y = r => 100 + r * 250;
+const Y = r => 100 + r * 280;
 
 const SITE = "https://deniztuglu.github.io/borderlands/";
 const OWNER = "deniztuglu", REPO = "borderlands", FILE = "reveal.json", BRANCH = "main";
@@ -544,7 +565,7 @@ new ResizeObserver(fit).observe(pscroll);
 const listEl = $("list");
 listEl.innerHTML = GROUPS.filter(([, ids]) => ids.some(id => !HEROES.includes(id))).map(([label, ids]) =>
   `<section><h2>${esc(label)}</h2><div class="togs">${ids.filter(id => !HEROES.includes(id)).map(id =>
-    `<button type="button" class="tog" data-id="${id}" aria-pressed="false"><span class="t-name">${esc(byId[id].name)}</span><span class="t-role">${esc(byId[id].role)}</span></button>`).join("")}</div></section>`).join("");
+    `<button type="button" class="tog${CARDS[id] ? " has-face" : ""}" data-id="${id}" aria-pressed="false">${CARDS[id] ? `<img class="t-face" src="../${cardArt(id, true)}" alt="" loading="lazy">` : ""}<span class="t-name">${esc(byId[id].name)}</span><span class="t-role">${esc(byId[id].role)}</span></button>`).join("")}</div></section>`).join("");
 listEl.addEventListener("click", e => { const b = e.target.closest(".tog"); if (b) toggle(b.dataset.id); });
 
 function stateOf(id) {

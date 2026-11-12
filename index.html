@@ -12,7 +12,7 @@
 <title>Keep Who's Who</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Caveat:wght@500;600;700&family=Permanent+Marker&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Open+Sans:ital,wdth,wght@0,80,700;1,80,700&family=Roboto+Serif:wdth,wght@50..100,800&family=Caveat:wght@500;600;700&family=Permanent+Marker&family=Special+Elite&display=swap">
 <style>
 /* Players' who's-who for the Keep. Phone first: index cards pinned to cork in two columns, grouped by
    where you'd find each person; tap one for a case file with a little red-string board of their ties
@@ -217,11 +217,45 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 }
 .card.vellum .nm { color: #8e1c13; }
 
+/* Faces from the NPC cards, clipped to the index cards */
+.card .ph {
+  display: block; width: 76%; margin: -1px auto 10px; padding: 4px; background: #fff;
+  transform: rotate(var(--pr, 0deg)); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.18);
+}
+.card .ph img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: #fff; }
+.card.dead .ph img { filter: grayscale(1); }
+.board .card .ph { width: 48%; padding: 3px; margin-bottom: 8px; }
+
+/* The NPC card itself, laid out like the printed ones: name, art, orange band */
+.npc {
+  container-type: inline-size; position: relative; margin: 0; aspect-ratio: 63.5 / 88.9; overflow: hidden;
+  display: flex; flex-direction: column; background: #fff; color: #141414; border-radius: 4.8% / 3.4%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+.npc .nc-name {
+  flex: none; height: 12.5%; display: flex; align-items: flex-end; justify-content: center; padding: 0 5%;
+  font: 800 14.5cqw/0.9 "Roboto Serif", Georgia, serif; font-stretch: 54%;
+  letter-spacing: 0.01em; text-transform: uppercase; white-space: nowrap;
+}
+.npc .nc-name.long { font-size: 11.5cqw; }
+.npc .nc-art { flex: 1; min-height: 0; position: relative; }
+.npc .nc-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.npc .nc-band {
+  flex: none; height: 13%; position: relative; display: flex; flex-direction: column; justify-content: center;
+  background: #cd5c2c; color: #fff; text-align: center; font-family: "Open Sans", "Alegreya Sans", sans-serif; font-stretch: 80%;
+}
+.npc .nc-band::before {
+  content: ""; position: absolute; left: 0; bottom: 100%; width: 7cqw; height: 7cqw;
+  background: radial-gradient(circle at 100% 0, transparent 7cqw, #cd5c2c calc(7cqw + 0.6px));
+}
+.npc .nc-band b { font-weight: 700; font-size: 7.6cqw; line-height: 1.05; letter-spacing: 0.02em; }
+.npc .nc-band i { font-weight: 700; font-size: 5.2cqw; line-height: 1.25; }
+
 /* Board view */
 .board-view { padding-block: 18px 40px; }
 .board-scroll { overflow: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
 .board-scroll .frame { width: max-content; margin: 0 auto; padding: 16px; }
-.board { position: relative; width: 1515px; height: 1290px; overflow: hidden; }
+.board { position: relative; width: 1515px; height: 1510px; overflow: hidden; }
 .board .tape { position: absolute; left: 50%; top: 22px; margin: 0; transform: translateX(-50%) rotate(-1.2deg); font-size: 27px; padding: 7px 26px 5px; white-space: nowrap; }
 .board .card { position: absolute; width: 158px; z-index: 1; }
 .board .card.off { display: none; }
@@ -260,6 +294,9 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 }
 .tag.k-h { border-left-color: var(--thread-hero); }
 .hint { margin: 10px 0 0; color: var(--dim); font-size: 0.95rem; }
+.foot { padding-block: 0 36px; }
+.foot p { margin: 0; max-width: 72ch; font-size: 0.82rem; line-height: 1.45; color: #8d968f; }
+.foot a { color: inherit; }
 
 /* Case file: full screen on phones, a side panel on big screens */
 .file {
@@ -285,6 +322,12 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
 .file-bar .close { font-size: 22px; padding: 0; }
 .file h2 { margin: 16px 0 0; font: 400 28px/1.1 var(--f-type); text-wrap: balance; }
 .file .sub { margin: 4px 0 0; font-size: 1rem; color: var(--ink-soft); }
+.file-head { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 16px; }
+.file-head h2 { margin-top: 4px; }
+.npc-btn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; transform: rotate(-1.5deg); border-radius: 6px; }
+.npc-btn:focus-visible { outline: 3px solid #8e6a2a; outline-offset: 3px; }
+.file-head.zoom { grid-template-columns: minmax(0, 1fr); }
+.file-head.zoom .npc-btn { width: min(100%, 340px); margin: 0 auto; transform: none; cursor: zoom-out; }
 .file h3 { margin: 22px 0 8px; font: 700 0.74rem/1.2 var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; color: #6b5d3d; }
 .file .about { margin: 0; font-size: 1.05rem; line-height: 1.5; }
 .file .known { margin: 8px 0 0; font: 600 21px/1.15 var(--f-hand); color: var(--ink-pen); }
@@ -397,6 +440,10 @@ h1 { margin: 0; font: 400 clamp(2.1rem, 8vw, 3.6rem)/1.02 var(--f-marker); lette
     <p class="hint">Tap a card to light up its threads and open its file. Tap empty cork to clear.</p>
   </section>
 </main>
+
+<footer class="wrap foot">
+  <p>Who's Who at the Keep is unofficial Fan Content permitted under the <a href="https://company.wizards.com/en/legal/fancontentpolicy" target="_blank" rel="noopener">Fan Content Policy</a>. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.</p>
+</footer>
 
 <aside class="file" id="file" role="dialog" aria-labelledby="file-name" hidden>
   <div class="file-in">
@@ -609,11 +656,26 @@ const GROUPS = [
   ["Remembered", ["lubik"]],
 ];
 
+/* NPC cards: the line on each card's orange band. Art lives in cards/: the official starter-set card art
+   (jpg), or a homemade silhouette (svg) for the characters the set has no card for. */
+const CARDS = {
+  gala: "Human Gate Guard", bartho: "Human Gate Guard", andrella: "Human Captain of the Guard", shannik: "Human Sergeant of the Guard",
+  winvarle: "Human Castellan", elandra: "Elf Adviser", dewran: "Dwarf Scribe", lenk: "Human Jeweler", toryn: "Human Guild Master",
+  oleira: "Human Shopkeeper", quink: "Halfling Banker", kalista: "Dwarf Blacksmith", yvette: "Human Bank Guard", fazzir: "Human Priest",
+  ruckus: "Halfling Shopkeeper", cornflower: "Halfling Barn Hand", umbrusk: "Human Barkeep", haldryck: "Dwarf Innkeeper",
+  mallyn: "Human Traveler", xanthe: "Elf Hermit",
+  lysa: "Human Scholar", doran: "Human Caravan Captain", martial: "Human Vanguard Leader", brom: "Dwarf Cleric",
+  velrith: "Drow Adventurer", serah: "Human Adventurer", derlo: "Human Would-Be Knight", ulmar: "Human Shield Bearer",
+  ivlis: "Human Priestess", jacko: "Halfling Fence", krentz: "Human Crew Boss", lubik: "Human Former Castellan",
+};
+const HOMEMADE = new Set(["lysa", "doran", "martial", "brom", "velrith", "serah", "derlo", "ulmar", "ivlis", "jacko", "krentz", "lubik"]);
+const cardArt = (id, face) => `cards/${id}${face ? "-face" : ""}.${HOMEMADE.has(id) ? "svg" : "jpg"}`;
+
 const PIN = { keep: "#d1382b", vanguard: "#2f63b8", out: "#2b2b2b", party: "#e8b923", evidence: "#2f8a4e", dead: "#ececec", caravan: "#e07a2a" };
 const KIND = { t: "var(--thread)", h: "var(--thread-hero)" };
-const BW = 1515, BH = 1290;
+const BW = 1515, BH = 1510;
 const X = c => 100 + c * 187.5;
-const Y = r => 100 + r * 250;
+const Y = r => 100 + r * 280;
 const NOTE_KEY = "keep-whos-who-notes";
 const TAB_KEY = "keep-whos-who-tab";
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -673,7 +735,8 @@ function cardFace(p) {
     return `${marks}<span class="loc">The party</span><span class="nm">${esc(p.name)}</span><span class="q">${esc(p.q)}</span><span class="player">Player<i></i></span>`;
   }
   const stamp = p.stamp ? `<span class="stamp">${esc(p.stamp)}</span>` : "";
-  return `${marks}<span class="loc">${esc(p.loc)}</span><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.role)}</span><span class="q">${esc(p.q)}</span>${stamp}`;
+  const ph = CARDS[p.id] ? `<span class="ph" style="--pr:${((rnd(p.id, "ph") - 0.5) * 5).toFixed(1)}deg"><img src="${cardArt(p.id, true)}" alt="" loading="lazy" decoding="async"></span>` : "";
+  return `${marks}${ph}<span class="loc">${esc(p.loc)}</span><span class="nm">${esc(p.name)}</span><span class="role">${esc(p.role)}</span><span class="q">${esc(p.q)}</span>${stamp}`;
 }
 function makeCard(p, rot) {
   const el = document.createElement("button");
@@ -908,6 +971,12 @@ function sizeMini() {
 }
 new ResizeObserver(sizeMini).observe(body);
 
+function npcCard(p) {
+  const name = p.short || p.name;
+  return `<figure class="npc"><div class="nc-name${name.length > 8 ? " long" : ""}">${esc(name)}</div>`
+    + `<div class="nc-art"><img src="${cardArt(p.id)}" alt="${esc(name)}, from the NPC card"></div>`
+    + `<div class="nc-band"><b>NPC</b><i>${esc(CARDS[p.id])}</i></div></figure>`;
+}
 function renderFile() {
   const p = byId[cur];
   const ties = tiesOf(cur);
@@ -916,9 +985,9 @@ function renderFile() {
     const o = byId[t.other];
     return `<li><button type="button" data-go="${o.id}"><i style="background:${KIND[t.k]}"></i><span><b>${esc(o.name)}</b> · <span class="lab">${esc(t.l)}</span></span><span class="go" aria-hidden="true">›</span></button></li>`;
   }).join("");
+  const head = `<h2 id="file-name">${esc(p.name)}</h2><p class="sub">${esc(sub)}</p>`;
   body.innerHTML = `
-    <h2 id="file-name">${esc(p.name)}</h2>
-    <p class="sub">${esc(sub)}</p>
+    ${CARDS[p.id] ? `<div class="file-head"><button type="button" class="npc-btn" aria-label="Show ${esc(p.short || p.name)}'s card larger">${npcCard(p)}</button><div>${head}</div></div>` : head}
     ${ties.length ? miniBoard(p, ties) : ""}
     <h3>${p.style === "hero" ? "Their hook" : "Who they are"}</h3>
     <p class="about">${esc(p.about)}</p>
@@ -927,6 +996,11 @@ function renderFile() {
     <h3><label for="note">Your notes</label></h3>
     <textarea class="notes" id="note" spellcheck="true" placeholder="What did you learn? What don't you trust?">${esc(notes[cur] || "")}</textarea>
     <p class="small">Saved on this device only. Nobody else sees them.</p>`;
+  const nb = body.querySelector(".npc-btn");
+  if (nb) nb.addEventListener("click", () => {
+    const on = nb.parentElement.classList.toggle("zoom");
+    nb.setAttribute("aria-label", `Show ${p.short || p.name}'s card ${on ? "smaller" : "larger"}`);
+  });
   backBtn.hidden = stack.length === 0;
   backBtn.setAttribute("aria-label", stack.length ? `Back to ${byId[stack[stack.length - 1]].name}` : "Back");
   sizeMini();
