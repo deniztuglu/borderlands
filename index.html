@@ -656,7 +656,7 @@ const GROUPS = [
   ["Remembered", ["lubik"]],
 ];
 
-/* NPC cards: the line on each card's orange band. Art lives in cards/: the official starter-set card art
+/* NPC cards: the line on each card's orange band. Art lives in card-art/: the official starter-set card art
    (jpg), or a homemade silhouette (svg) for the characters the set has no card for. */
 const CARDS = {
   gala: "Human Gate Guard", bartho: "Human Gate Guard", andrella: "Human Captain of the Guard", shannik: "Human Sergeant of the Guard",
@@ -669,7 +669,7 @@ const CARDS = {
   ivlis: "Human Priestess", jacko: "Halfling Fence", krentz: "Human Crew Boss", lubik: "Human Former Castellan",
 };
 const HOMEMADE = new Set(["lysa", "doran", "martial", "brom", "velrith", "serah", "derlo", "ulmar", "ivlis", "jacko", "krentz", "lubik"]);
-const cardArt = (id, face) => `cards/${id}${face ? "-face" : ""}.${HOMEMADE.has(id) ? "svg" : "jpg"}`;
+const cardArt = (id, face) => `card-art/${id}${face ? "-face" : ""}.${HOMEMADE.has(id) ? "svg" : "jpg"}`;
 
 const PIN = { keep: "#d1382b", vanguard: "#2f63b8", out: "#2b2b2b", party: "#e8b923", evidence: "#2f8a4e", dead: "#ececec", caravan: "#e07a2a" };
 const KIND = { t: "var(--thread)", h: "var(--thread-hero)" };
