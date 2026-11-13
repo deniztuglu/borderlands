@@ -668,7 +668,7 @@ const CARDS = {
   velrith: "Drow Adventurer", serah: "Human Adventurer", derlo: "Human Would-Be Knight", ulmar: "Human Shield Bearer",
   ivlis: "Human Priestess", jacko: "Halfling Fence", krentz: "Human Crew Boss", lubik: "Human Former Castellan",
 };
-const HOMEMADE = new Set(["jacko"]);   // drawn SVG silhouette; everyone else has painted jpg art
+const HOMEMADE = new Set([]);   // ids still using a drawn SVG; everyone now has painted jpg art
 const cardArt = (id, face) => `card-art/${id}${face ? "-face" : ""}.${HOMEMADE.has(id) ? "svg" : "jpg"}`;
 
 const PIN = { keep: "#d1382b", vanguard: "#2f63b8", out: "#2b2b2b", party: "#e8b923", evidence: "#2f8a4e", dead: "#ececec", caravan: "#e07a2a" };
